@@ -265,8 +265,6 @@ const PedidoExterno = ({ productos, onPedidoConfirmado }) => {
   const [cobrarEnvio, setCobrarEnvio] = useState(false);
   const [costoEnvio, setCostoEnvio] = useState('');
 
-  const API_URL = 'http://localhost:8000/api';
-  
   const agregarAlCarrito = (producto, cantidad, tipo, conVerdura) => {
     if (cantidad <= 0) return;
     
@@ -312,7 +310,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado }) => {
     };
 
     try {
-      const response = await fetch(`${API_URL}/pedidos`, {
+      const response = await fetch(`/api/pedidos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -697,8 +695,6 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado }) => {
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
   const [carrito, setCarrito] = useState([]);
 
-  const API_URL = 'http://localhost:8000/api';
-  
   const seleccionarMesa = (mesa) => {
     if (mesa.estado === 'disponible') {
       setMesaSeleccionada(mesa.id);
@@ -751,7 +747,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado }) => {
     };
 
     try {
-      const response = await fetch(`${API_URL}/pedidos`, {
+      const response = await fetch(`/api/pedidos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevoPedidoData),
@@ -891,8 +887,6 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
     disponible: true
   });
 
-  const API_URL = 'http://localhost:8000/api';
-  
   const pedidosFiltrados = filtroPedidos === 'todos' 
     ? pedidos 
     : pedidos.filter(p => p.tipo === filtroPedidos);
@@ -916,7 +910,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
     };
 
     try {
-      await fetch(`${API_URL}/productos/${id}`, {
+      await fetch(`/api/productos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProduct)
@@ -933,7 +927,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
     const updatedProduct = { ...producto, disponible: !producto.disponible };
 
     try {
-      await fetch(`${API_URL}/productos/${id}`, {
+      await fetch(`/api/productos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProduct)
@@ -960,7 +954,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
     const productoACrear = { ...newProduct, precio: parseFloat(newProduct.precio) };
 
     try {
-      const response = await fetch(`${API_URL}/productos`, {
+      const response = await fetch(`/api/productos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -982,7 +976,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
   
   const cambiarEstadoPedido = async (id, nuevoEstado) => {
     try {
-      await fetch(`${API_URL}/pedidos/${id}`, {
+      await fetch(`/api/pedidos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado: nuevoEstado })
