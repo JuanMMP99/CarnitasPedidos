@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('../backend/database.js'); // Reutilizamos la conexión a la BD
+const db = require('./_lib/database.js'); // Reutilizamos la conexión a la BD
 
 const app = express();
 
