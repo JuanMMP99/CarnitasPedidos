@@ -31,33 +31,34 @@ function App() {
       fetch(`${API_URL}/pedidos`),
     ]);
 
-    // Verificar si las respuestas son exitosas
-    if (!productosRes.ok) {
-      throw new Error(`Error al obtener productos: ${productosRes.status} ${productosRes.statusText}`);
+    // Verificar si las respuestas son exitosas y lanzar un error si no lo son
+    if (!productosRes.ok) { 
+      throw new Error(`Error al obtener productos: ${productosRes.status} ${productosRes.statusText}`); 
     }
-    if (!mesasRes.ok) {
-      throw new Error(`Error al obtener mesas: ${mesasRes.status} ${mesasRes.statusText}`);
+    if (!mesasRes.ok) { 
+      throw new Error(`Error al obtener mesas: ${mesasRes.status} ${mesasRes.statusText}`); 
     }
-    if (!pedidosRes.ok) {
-      throw new Error(`Error al obtener pedidos: ${pedidosRes.status} ${pedidosRes.statusText}`);
+    if (!pedidosRes.ok) { 
+      throw new Error(`Error al obtener pedidos: ${pedidosRes.status} ${pedidosRes.statusText}`); 
     }
     
     const productosData = await productosRes.json();
     const mesasData = await mesasRes.json();
     const pedidosData = await pedidosRes.json();
         
-    setProductos(productosData.data || []);
-    setMesas(mesasData.data || []);
-    setPedidos(pedidosData.data || []);
+    // Asegurarnos de que siempre asignamos un array
+    setProductos(productosData?.data || []);
+    setMesas(mesasData?.data || []);
+    setPedidos(pedidosData?.data || []);
 
   } catch (error) {
     console.error("Error fetching data:", error);
-    // Inicializar con arrays vacíos para evitar errores en la UI
+    // Inicializar con arrays vacíos para evitar errores en la UI si la carga inicial falla
     setProductos([]);
     setMesas([]);
     setPedidos([]);
 
-    // Mostrar una alerta más útil al usuario
+    // Mostrar una alerta más útil al usuario en el entorno de desarrollo
     if (process.env.NODE_ENV === 'development') {
       alert(`Error cargando datos: ${error.message}. Revisa la consola del navegador (F12) y la terminal de tu servidor backend para más detalles.`);
     }
