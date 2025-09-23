@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./_lib/database.js'); // Reutilizamos la conexión a la BD
+const db = require('./_lib/database.js'); // Ruta corregida
 
 const app = express();
 
@@ -14,13 +14,13 @@ app.get("/api/productos", async (req, res) => {
     const sql = "SELECT * FROM productos ORDER BY id ASC";
     try {
         const { rows } = await db.query(sql);
-        // 'tipos' ya es un array de texto en PostgreSQL, no necesita JSON.parse
         res.json({
             "message": "success",
             "data": rows
         });
     } catch (err) {
-        res.status(400).json({ "error": err.message });
+        console.error("Error fetching productos:", err);
+        res.status(500).json({ "error": err.message });
     }
 });
 
@@ -34,7 +34,8 @@ app.get("/api/mesas", async (req, res) => {
             "data": rows
         });
     } catch (err) {
-        res.status(400).json({ "error": err.message });
+        console.error("Error fetching mesas:", err);
+        res.status(500).json({ "error": err.message });
     }
 });
 
@@ -43,28 +44,26 @@ app.get("/api/pedidos", async (req, res) => {
     const sql = "SELECT * FROM pedidos ORDER BY fecha DESC";
     try {
         const { rows } = await db.query(sql);
-        // 'cliente' e 'items' ya son JSONB en PostgreSQL, no necesitan JSON.parse
         res.json({
             "message": "success",
             "data": rows
         });
     } catch (err) {
-        res.status(400).json({ "error": err.message });
+        console.error("Error fetching pedidos:", err);
+        res.status(500).json({ "error": err.message });
     }
 });
 
 // POST: Crear un nuevo pedido
 app.post("/api/pedidos", async (req, res) => {
     const data = req.body;
-    // Usamos $1, $2, etc. para los parámetros en PostgreSQL
-    // La columna 'id' es autoincremental (SERIAL)
     const sql = `INSERT INTO pedidos (tipo, cliente, items, total, costoEnvio, horaEntrega, metodoPago, pagoCon, cambio, observaciones, estado, fecha, mesaId) 
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-                 RETURNING id`; // RETURNING id nos devuelve el ID del nuevo pedido
+                 RETURNING id`;
     const params = [
         data.tipo,
-        data.cliente, // Se guarda como JSONB directamente
-        data.items,   // Se guarda como JSONB directamente
+        data.cliente,
+        data.items,
         data.total,
         data.costoEnvio,
         data.horaEntrega,
@@ -85,7 +84,8 @@ app.post("/api/pedidos", async (req, res) => {
             "id": newId
         });
     } catch (err) {
-        res.status(400).json({ "error": err.message });
+        console.error("Error creating pedido:", err);
+        res.status(500).json({ "error": err.message });
     }
 });
 
@@ -100,7 +100,8 @@ app.put("/api/pedidos/:id", async (req, res) => {
             changes: result.rowCount
         });
     } catch (err) {
-        res.status(400).json({ "error": err.message });
+        console.error("Error updating pedido:", err);
+        res.status(500).json({ "error": err.message });
     }
 });
 
@@ -112,14 +113,4 @@ app.put("/api/productos/:id", async (req, res) => {
         const result = await db.query(sql, [nombre, precio, disponible, req.params.id]);
         res.json({ message: "success", data: req.body, changes: result.rowCount });
     } catch (err) {
-        res.status(400).json({ "error": err.message });
-    }
-});
-
-// Default response for any other request
-app.use(function(req, res){
-    res.status(404).json({ "error": "Not Found" });
-});
-
-// Exportamos la app para que Vercel la pueda usar
-module.exports = app;
+        console.error("Error updating producto:", err);
