@@ -1,11 +1,16 @@
-const db = require('../_lib/database.js');
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL + '?sslmode=require',
+  ssl: { rejectUnauthorized: false }
+});
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   
   if (req.method === 'GET') {
     try {
-      const { rows } = await db.query('SELECT * FROM mesas ORDER BY numero');
+      const { rows } = await pool.query('SELECT * FROM mesas ORDER BY numero');
       res.json({ message: "success", data: rows });
     } catch (err) {
       res.status(500).json({ error: err.message });
