@@ -7,8 +7,15 @@
     },
     {
       "src": "package.json",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["build/**"] }
+      "use": "@vercel/static-build",
+      "config": { "distDir": "build" }
     }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
