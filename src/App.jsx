@@ -720,6 +720,7 @@ const ProductoSelector = ({ producto, onAgregar }) => {
 const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL }) => {
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
   const [carrito, setCarrito] = useState([]);
+  const [showResumen, setShowResumen] = useState(false);
 
   const seleccionarMesa = (mesa) => {
     if (mesa.estado === 'disponible') {
@@ -782,6 +783,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
       
       onPedidoFinalizado(); // Recarga todos los datos
       setCarrito([]);
+      setShowResumen(false); // Cierra el modal de resumen
     } catch (error) {
       console.error('Error al finalizar pedido:', error);
       alert('Hubo un error al registrar el pedido para la mesa.');
@@ -852,47 +854,76 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
                 />
             </div>
           </div>
-          
-          {carrito.length > 0 && (
-            <div className="bg-white rounded-xl shadow-md p-4 mb-6">
-              <h3 className="font-semibold mb-3 text-gray-800">Resumen de la Mesa</h3>
-              
-              <ul className="space-y-2 mb-4">
-                {carrito.map(item => (
-                  <li key={item.id} className="flex justify-between">
-                    <div>
-                      <span className="font-medium">{item.cantidad}x {item.nombre}</span>
-                      {item.tipo && <span className="text-sm text-gray-500"> ({item.tipo})</span>}
-                      {item.conVerdura !== null && (
-                        <span className="text-sm text-gray-500"> - {item.conVerdura ? 'Con verdura' : 'Sin verdura'}</span>
-                      )}
-                    </div>
-                    <span>${item.precio * item.cantidad}</span>
-                  </li>
-                ))}
-              </ul>
-              
-              <div className="border-t pt-3">
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total:</span>
-                  <span>${calcularTotal()}</span>
+
+          {carrito.length > 0 && !showResumen && (
+            <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+              <div className="flex justify-between items-center max-w-md mx-auto">
+                <div>
+                  <p className="font-semibold">{carrito.length} producto(s) en el carrito</p>
+                  <p className="text-orange-500 font-bold">Total: ${calcularTotal()}</p>
                 </div>
+                <button
+                  onClick={() => setShowResumen(true)}
+                  className="bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold"
+                >
+                  Ver Resumen
+                </button>
               </div>
             </div>
           )}
+
+          <AnimatePresence>
+            {showResumen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                onClick={() => setShowResumen(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-white rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="text-xl font-bold mb-4 text-orange-500">Resumen de la Mesa</h3>
+                  <ul className="space-y-2 mb-4">
+                    {carrito.map(item => (
+                      <li key={item.id} className="flex justify-between">
+                        <div>
+                          <span className="font-medium">{item.cantidad}x {item.nombre}</span>
+                          {item.tipo && <span className="text-sm text-gray-500"> ({item.tipo})</span>}
+                          {item.conVerdura !== null && (
+                            <span className="text-sm text-gray-500"> - {item.conVerdura ? 'Con verdura' : 'Sin verdura'}</span>
+                          )}
+                        </div>
+                        <span>${item.precio * item.cantidad}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="border-t pt-4 mb-6">
+                    <div className="flex justify-between text-xl font-bold">
+                      <span>Total:</span>
+                      <span>${calcularTotal()}</span>
+                    </div>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button onClick={() => setShowResumen(false)} className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold">Modificar</button>
+                    <button onClick={finalizarPedido} className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-semibold">Finalizar Pedido</button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 mt-4">
             <button
               onClick={liberarMesa}
               className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold"
             >
               Liberar Mesa
-            </button>
-            <button
-              onClick={finalizarPedido}
-              className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-semibold"
-            >
-              Finalizar Pedido
             </button>
           </div>
         </>
