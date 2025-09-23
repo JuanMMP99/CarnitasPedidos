@@ -14,9 +14,15 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/productos", "destination": "/api/productos.js" },
+    { "source": "/api/productos/:id", "destination": "/api/productos/[id].js" },
+    { "source": "/api/mesas", "destination": "/api/mesas.js" },
+    { "source": "/api/mesas/:id", "destination": "/api/mesas/[id].js" },
+    { "source": "/api/pedidos", "destination": "/api/pedidos.js" },
+    { "source": "/api/pedidos/:id", "destination": "/api/pedidos/[id].js" },
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
