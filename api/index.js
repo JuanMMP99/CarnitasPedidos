@@ -9,6 +9,18 @@ app.use(express.json());
 
 // --- API Endpoints ---
 
+// Health Check Endpoint para diagnosticar la conexión a la BD
+app.get("/health", async (req, res) => {
+    try {
+        await db.query('SELECT NOW()'); // Una consulta simple para verificar la conexión
+        res.status(200).json({ status: "ok", message: "La conexión a la base de datos es exitosa." });
+    } catch (err) {
+        console.error("Fallo en el health check de la base de datos:", err);
+        // Devolvemos un error 500 con el mensaje para poder verlo en el navegador
+        res.status(500).json({ status: "error", message: "No se pudo conectar a la base de datos.", error: err.message });
+    }
+});
+
 // GET: Obtener todos los productos
 app.get("/productos", async (req, res) => {
     console.log("GET /productos request received");
@@ -124,5 +136,5 @@ app.put("/productos/:id", async (req, res) => {
     }
 });
 
-// Exportamos la app para que Vercel la pueda usar
+// Exportamos la app para que Vercel la pueda usar.
 module.exports = app;
