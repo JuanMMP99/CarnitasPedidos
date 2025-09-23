@@ -18,10 +18,10 @@ function App() {
   // En producción, la API estará en la misma URL, bajo la ruta /api
   // En desarrollo, podemos usar un proxy o mantener la URL completa.
   // En producción, la API estará en la misma URL, bajo la ruta /api
-// En desarrollo, podemos usar un proxy o mantener la URL completa.
-const API_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:3001/api'  // Si pruebas localmente con un servidor
-  : '/api';  // En producción en Vercel
+  // En desarrollo, podemos usar un proxy o mantener la URL completa.
+  const API_URL = process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:3001/api'  // Si pruebas localmente con un servidor
+    : '/api';  // En producción en Vercel
 
   const fetchData = useCallback(async () => {
   try {
