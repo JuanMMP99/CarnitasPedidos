@@ -25,9 +25,6 @@ const API_URL = process.env.NODE_ENV === 'development'
 
   const fetchData = useCallback(async () => {
   try {
-    // La siguiente línea es generada por Babel y puede ser ignorada.
-    console.log("Fetching data from:", API_URL);
-
     const [productosRes, mesasRes, pedidosRes] = await Promise.all([
       fetch(`${API_URL}/productos`),
       fetch(`${API_URL}/mesas`),
@@ -48,13 +45,7 @@ const API_URL = process.env.NODE_ENV === 'development'
     const productosData = await productosRes.json();
     const mesasData = await mesasRes.json();
     const pedidosData = await pedidosRes.json();
-
-    console.log("Datos recibidos (cantidad de registros):", {
-      productos: productosData?.data?.length || 0,
-      mesas: mesasData?.data?.length || 0,
-      pedidos: pedidosData?.data?.length || 0
-    });
-    
+        
     setProductos(productosData.data || []);
     setMesas(mesasData.data || []);
     setPedidos(pedidosData.data || []);
@@ -1017,7 +1008,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
       });
       onDataChange(); // Recargar todos los datos para reflejar el cambio
     } catch (error) {
-      console.error("Error al cambiar el estado del pedido:", error);
+      console.error("Error al cambiar el estado del pedido:", error, `URL: ${API_URL}/pedidos/${id}`);
       alert('Hubo un error al actualizar el estado del pedido.');
     }
   };
