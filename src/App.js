@@ -15,7 +15,9 @@ function App() {
   ]);
   const [productos, setProductos] = useState([]);
 
-  const API_URL = 'http://localhost:8000/api';
+  // En producción, la API estará en la misma URL, bajo la ruta /api
+  // En desarrollo, podemos usar un proxy o mantener la URL completa.
+  const API_URL = '/api';
 
   const fetchData = useCallback(async () => {
     try {
@@ -35,7 +37,7 @@ function App() {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  }, []);
+  }, [API_URL]);
 
   useEffect(() => {
     fetchData();
@@ -264,7 +266,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado }) => {
   const [costoEnvio, setCostoEnvio] = useState('');
 
   const API_URL = 'http://localhost:8000/api';
-
+  
   const agregarAlCarrito = (producto, cantidad, tipo, conVerdura) => {
     if (cantidad <= 0) return;
     
