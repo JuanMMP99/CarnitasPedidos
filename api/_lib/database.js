@@ -1,11 +1,10 @@
 const { Pool } = require('pg');
 
-// La URL de conexión a la base de datos se obtiene de las variables de entorno de Vercel
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
+  connectionString: process.env.POSTGRES_URL + '?sslmode=require',
   ssl: {
-    rejectUnauthorized: false, // Necesario para las conexiones en Vercel
-  },
+    rejectUnauthorized: false
+  }
 });
 
 module.exports = pool;

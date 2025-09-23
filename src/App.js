@@ -17,27 +17,63 @@ function App() {
 
   // En producción, la API estará en la misma URL, bajo la ruta /api
   // En desarrollo, podemos usar un proxy o mantener la URL completa.
-  const API_URL = '/api';
+  // En producción, la API estará en la misma URL, bajo la ruta /api
+// En desarrollo, podemos usar un proxy o mantener la URL completa.
+const API_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:3001/api'  // Si pruebas localmente con un servidor
+  : '/api';  // En producción en Vercel
 
   const fetchData = useCallback(async () => {
-    try {
-      const [productosRes, mesasRes, pedidosRes] = await Promise.all([
-        fetch(`${API_URL}/productos`),
-        fetch(`${API_URL}/mesas`),
-        fetch(`${API_URL}/pedidos`),
-      ]);
+  try {
+    console.log("Fetching data from:", API_URL);
+    
+    const [productosRes, mesasRes, pedidosRes] = await Promise.all([
+      fetch(`${API_URL}/productos`),
+      fetch(`${API_URL}/mesas`),
+      fetch(`${API_URL}/pedidos`),
+    ]);
 
-      const productosData = await productosRes.json();
-      const mesasData = await mesasRes.json();
-      const pedidosData = await pedidosRes.json();
-
-      setProductos(productosData.data);
-      setMesas(mesasData.data);
-      setPedidos(pedidosData.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    // Verificar si las respuestas son exitosas
+    if (!productosRes.ok) {
+      console.error("Error productos:", productosRes.status, productosRes.statusText);
+      throw new Error(`Productos: ${productosRes.status}`);
     }
-  }, [API_URL]);
+    if (!mesasRes.ok) {
+      console.error("Error mesas:", mesasRes.status, mesasRes.statusText);
+      throw new Error(`Mesas: ${mesasRes.status}`);
+    }
+    if (!pedidosRes.ok) {
+      console.error("Error pedidos:", pedidosRes.status, pedidosRes.statusText);
+      throw new Error(`Pedidos: ${pedidosRes.status}`);
+    }
+
+    const productosData = await productosRes.json();
+    const mesasData = await mesasRes.json();
+    const pedidosData = await pedidosRes.json();
+
+    console.log("Datos recibidos:", {
+      productos: productosData.data?.length || 0,
+      mesas: mesasData.data?.length || 0,
+      pedidos: pedidosData.data?.length || 0
+    });
+
+    setProductos(productosData.data || []);
+    setMesas(mesasData.data || []);
+    setPedidos(pedidosData.data || []);
+
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    // Inicializar con arrays vacíos para evitar errores
+    setProductos([]);
+    setMesas([]);
+    setPedidos([]);
+    
+    // Mostrar alerta solo en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      alert(`Error cargando datos: ${error.message}. Revisa la consola para más detalles.`);
+    }
+  }
+}, [API_URL]);
 
   useEffect(() => {
     fetchData();
