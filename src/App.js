@@ -33,25 +33,18 @@ const API_URL = process.env.NODE_ENV === 'development'
       fetch(`${API_URL}/pedidos`),
     ]);
 
-    // Verificar si las respuestas son exitosas
-    if (!productosRes.ok) {
-      console.error("Error productos:", productosRes.status, productosRes.statusText);
-      throw new Error(`Productos: ${productosRes.status}`);
-    }
-    if (!mesasRes.ok) {
-      console.error("Error mesas:", mesasRes.status, mesasRes.statusText);
-      throw new Error(`Mesas: ${mesasRes.status}`);
-    }
-    if (!pedidosRes.ok) {
-      console.error("Error pedidos:", pedidosRes.status, pedidosRes.statusText);
-      throw new Error(`Pedidos: ${pedidosRes.status}`);
-    }
+    console.log("Respuestas recibidas:", {
+      productos: productosRes.status,
+      mesas: mesasRes.status, 
+      pedidos: pedidosRes.status
+    });
 
-    const productosData = await productosRes.json();
-    const mesasData = await mesasRes.json();
-    const pedidosData = await pedidosRes.json();
+    // Solo procesar si la respuesta es OK
+    const productosData = productosRes.ok ? await productosRes.json() : {data: []};
+    const mesasData = mesasRes.ok ? await mesasRes.json() : {data: []};
+    const pedidosData = pedidosRes.ok ? await pedidosRes.json() : {data: []};
 
-    console.log("Datos recibidos:", {
+    console.log("Datos procesados:", {
       productos: productosData.data?.length || 0,
       mesas: mesasData.data?.length || 0,
       pedidos: pedidosData.data?.length || 0
@@ -63,15 +56,9 @@ const API_URL = process.env.NODE_ENV === 'development'
 
   } catch (error) {
     console.error("Error fetching data:", error);
-    // Inicializar con arrays vacíos para evitar errores
     setProductos([]);
     setMesas([]);
     setPedidos([]);
-    
-    // Mostrar alerta solo en desarrollo
-    if (process.env.NODE_ENV === 'development') {
-      alert(`Error cargando datos: ${error.message}. Revisa la consola para más detalles.`);
-    }
   }
 }, [API_URL]);
 
