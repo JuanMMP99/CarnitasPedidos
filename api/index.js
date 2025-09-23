@@ -10,7 +10,7 @@ app.use(express.json());
 // --- API Endpoints ---
 
 // GET: Obtener todos los productos
-app.get("/api/productos", async (req, res) => {
+app.get("/productos", async (req, res) => {
     const sql = "SELECT * FROM productos ORDER BY id ASC";
     try {
         const { rows } = await db.query(sql);
@@ -25,7 +25,7 @@ app.get("/api/productos", async (req, res) => {
 });
 
 // GET: Obtener todas las mesas
-app.get("/api/mesas", async (req, res) => {
+app.get("/mesas", async (req, res) => {
     const sql = "SELECT * FROM mesas ORDER BY numero ASC";
     try {
         const { rows } = await db.query(sql);
@@ -40,7 +40,7 @@ app.get("/api/mesas", async (req, res) => {
 });
 
 // GET: Obtener todos los pedidos
-app.get("/api/pedidos", async (req, res) => {
+app.get("/pedidos", async (req, res) => {
     const sql = "SELECT * FROM pedidos ORDER BY fecha DESC";
     try {
         const { rows } = await db.query(sql);
@@ -55,7 +55,7 @@ app.get("/api/pedidos", async (req, res) => {
 });
 
 // POST: Crear un nuevo pedido
-app.post("/api/pedidos", async (req, res) => {
+app.post("/pedidos", async (req, res) => {
     const data = req.body;
     const sql = `INSERT INTO pedidos (tipo, cliente, items, total, costoEnvio, horaEntrega, metodoPago, pagoCon, cambio, observaciones, estado, fecha, mesaId) 
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
@@ -90,7 +90,7 @@ app.post("/api/pedidos", async (req, res) => {
 });
 
 // PUT: Actualizar estado de un pedido
-app.put("/api/pedidos/:id", async (req, res) => {
+app.put("/pedidos/:id", async (req, res) => {
     const { estado } = req.body;
     const sql = `UPDATE pedidos SET estado = $1 WHERE id = $2`;
     try {
@@ -106,7 +106,7 @@ app.put("/api/pedidos/:id", async (req, res) => {
 });
 
 // PUT: Actualizar un producto (ej. disponibilidad)
-app.put("/api/productos/:id", async (req, res) => {
+app.put("/productos/:id", async (req, res) => {
     const { nombre, precio, disponible } = req.body;
     const sql = `UPDATE productos SET nombre = $1, precio = $2, disponible = $3 WHERE id = $4`;
     try {
@@ -114,3 +114,5 @@ app.put("/api/productos/:id", async (req, res) => {
         res.json({ message: "success", data: req.body, changes: result.rowCount });
     } catch (err) {
         console.error("Error updating producto:", err);
+    }
+});
