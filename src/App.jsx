@@ -26,8 +26,9 @@ const API_URL = process.env.NODE_ENV === 'development'
   const fetchData = useCallback(async () => {
   try {
     var _productosData$data, _mesasData$data, _pedidosData$data;
+    var _productosData$data, _mesasData$data, _pedidosData$data;
     console.log("Fetching data from:", API_URL);
-    
+
     const [productosRes, mesasRes, pedidosRes] = await Promise.all([
       fetch(`${API_URL}/productos`),
       fetch(`${API_URL}/mesas`),
@@ -35,6 +36,17 @@ const API_URL = process.env.NODE_ENV === 'development'
     ]);
     
     // Verificar si las respuestas son exitosas
+    if (!productosRes.ok) {
+      throw new Error(`Error al obtener productos: ${productosRes.status} ${productosRes.statusText}`);
+    }
+    if (!mesasRes.ok) {
+      throw new Error(`Error al obtener mesas: ${mesasRes.status} ${mesasRes.statusText}`);
+    }
+    if (!pedidosRes.ok) {
+      throw new Error(`Error al obtener pedidos: ${pedidosRes.status} ${pedidosRes.statusText}`);
+    }
+
+       // Verificar si las respuestas son exitosas
     if (!productosRes.ok) {
       throw new Error(`Error al obtener productos: ${productosRes.status} ${productosRes.statusText}`);
     }
