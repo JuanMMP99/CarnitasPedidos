@@ -80,7 +80,7 @@ const API_URL = process.env.NODE_ENV === 'development'
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <PedidoExterno productos={productos} onPedidoConfirmado={fetchData} />
+              <PedidoExterno productos={productos} onPedidoConfirmado={fetchData} API_URL={API_URL} />
             </motion.div>
           )}
           
@@ -92,7 +92,7 @@ const API_URL = process.env.NODE_ENV === 'development'
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <PedidoInterno productos={productos} mesas={mesas} setMesas={setMesas} onPedidoFinalizado={fetchData} />
+              <PedidoInterno productos={productos} mesas={mesas} setMesas={setMesas} onPedidoFinalizado={fetchData} API_URL={API_URL} />
             </motion.div>
           )}
           
@@ -104,7 +104,7 @@ const API_URL = process.env.NODE_ENV === 'development'
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <AdminPanel productos={productos} setProductos={setProductos} pedidos={pedidos} mesas={mesas} onDataChange={fetchData} />
+              <AdminPanel productos={productos} setProductos={setProductos} pedidos={pedidos} mesas={mesas} onDataChange={fetchData} API_URL={API_URL} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -272,7 +272,7 @@ const GroupedProductSelector = ({ categoria, productos, onAgregar }) => {
   );
 };
 
-const PedidoExterno = ({ productos, onPedidoConfirmado }) => {
+const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
   const [cliente, setCliente] = useState({
     nombre: '',
     telefono: '',
@@ -333,7 +333,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado }) => {
     };
 
     try {
-      const response = await fetch(`/api/pedidos`, {
+      const response = await fetch(`${API_URL}/pedidos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -714,7 +714,7 @@ const ProductoSelector = ({ producto, onAgregar }) => {
   );
 };
 
-const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado }) => {
+const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL }) => {
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
   const [carrito, setCarrito] = useState([]);
 
@@ -770,7 +770,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado }) => {
     };
 
     try {
-      const response = await fetch(`/api/pedidos`, {
+      const response = await fetch(`${API_URL}/pedidos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevoPedidoData),
@@ -898,7 +898,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado }) => {
   );
 };
 
-const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) => {
+const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API_URL }) => {
   const [filtroPedidos, setFiltroPedidos] = useState('todos');
   const [editingProductId, setEditingProductId] = useState(null);
   const [editedProductData, setEditedProductData] = useState({ nombre: '', precio: '' });
@@ -933,7 +933,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
     };
 
     try {
-      await fetch(`/api/productos/${id}`, {
+      await fetch(`${API_URL}/productos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProduct)
@@ -950,7 +950,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
     const updatedProduct = { ...producto, disponible: !producto.disponible };
 
     try {
-      await fetch(`/api/productos/${id}`, {
+      await fetch(`${API_URL}/productos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProduct)
@@ -977,7 +977,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
     const productoACrear = { ...newProduct, precio: parseFloat(newProduct.precio) };
 
     try {
-      const response = await fetch(`/api/productos`, {
+      const response = await fetch(`${API_URL}/productos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -999,7 +999,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange }) =
   
   const cambiarEstadoPedido = async (id, nuevoEstado) => {
     try {
-      await fetch(`/api/pedidos/${id}`, {
+      await fetch(`${API_URL}/pedidos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado: nuevoEstado })
