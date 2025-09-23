@@ -904,6 +904,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
 const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API_URL }) => {
   const [filtroPedidos, setFiltroPedidos] = useState('todos');
   const [editingProductId, setEditingProductId] = useState(null);
+  const [selectedPedido, setSelectedPedido] = useState(null);
   const [editedProductData, setEditedProductData] = useState({ nombre: '', precio: '' });
   const [newProduct, setNewProduct] = useState({
     nombre: '',
@@ -1000,7 +1001,8 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
     alert('¡Producto creado con éxito!');
   };
   
-  const cambiarEstadoPedido = async (id, nuevoEstado) => {
+  const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
+    e.stopPropagation(); // Evita que se abra el modal al cambiar el estado
     try {
       await fetch(`${API_URL}/pedidos/${id}`, {
         method: 'PUT',
@@ -1009,7 +1011,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
       });
       onDataChange(); // Recargar todos los datos para reflejar el cambio
     } catch (error) {
-      console.error("Error al cambiar el estado del pedido:", error, `URL: ${API_URL}/pedidos/${id}`);
+      console.error("Error al cambiar el estado del pedido:", error);
       alert('Hubo un error al actualizar el estado del pedido.');
     }
   };
@@ -1044,7 +1046,11 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
         
         <div className="space-y-3 max-h-60 overflow-y-auto">
           {pedidosFiltrados.map(pedido => (
-            <div key={pedido.id} className="p-3 border border-gray-200 rounded-lg">
+            <div 
+              key={pedido.id} 
+              className="p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+              onClick={() => setSelectedPedido(pedido)}
+            >
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <p className="font-semibold">
@@ -1073,7 +1079,7 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
               <div className="flex space-x-2">
                 <select
                   value={pedido.estado}
-                  onChange={(e) => cambiarEstadoPedido(pedido.id, e.target.value)}
+                  onChange={(e) => cambiarEstadoPedido(e, pedido.id, e.target.value)}
                   className="text-xs p-1 border rounded"
                 >
                   <option value="pendiente">Pendiente</option>
@@ -1188,6 +1194,91 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedPedido && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setSelectedPedido(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold mb-4 text-orange-500">Resumen del Pedido</h3>
+              
+              {selectedPedido.tipo === 'externo' && selectedPedido.cliente && (
+                <div className="mb-4">
+                  <h4 className="font-semibold mb-2">Cliente:</h4>
+                  <p>{selectedPedido.cliente.nombre} - {selectedPedido.cliente.telefono}</p>
+                  {selectedPedido.cliente.tipoEntrega === 'domicilio' && <p>{selectedPedido.cliente.direccion}</p>}
+                  <p className="capitalize">{selectedPedido.cliente.tipoEntrega}</p>
+                </div>
+              )}
+
+              {selectedPedido.tipo === 'interno' && (
+                <div className="mb-4">
+                  <h4 className="font-semibold mb-2">Mesa:</h4>
+                  <p>Mesa {mesas.find(m => m.id === selectedPedido.mesaId)?.numero}</p>
+                </div>
+              )}
+              
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Productos:</h4>
+                <ul className="space-y-2">
+                  {selectedPedido.items.map(item => (
+                    <li key={item.id} className="flex justify-between">
+                      <div>
+                        <span className="font-medium">{item.cantidad}x {item.nombre}</span>
+                        {item.tipo && <span className="text-sm text-gray-500"> ({item.tipo})</span>}
+                        {item.conVerdura !== null && (
+                          <span className="text-sm text-gray-500"> - {item.conVerdura ? 'Con verdura' : 'Sin verdura'}</span>
+                        )}
+                      </div>
+                      <span>${item.precio * item.cantidad}</span>
+                    </li>
+                  ))}
+                </ul>
+                {selectedPedido.costoEnvio > 0 && (
+                  <div className="flex justify-between border-t pt-2 mt-2">
+                    <span className="font-medium">Costo de envío</span>
+                    <span>${parseFloat(selectedPedido.costoEnvio)}</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Detalles:</h4>
+                {selectedPedido.horaEntrega && <p>Hora: {selectedPedido.horaEntrega}</p>}
+                {selectedPedido.metodoPago && <p>Pago: {selectedPedido.metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>}
+                {selectedPedido.metodoPago === 'efectivo' && selectedPedido.pagoCon && (
+                  <p>Paga con: ${selectedPedido.pagoCon}</p>
+                )}
+                 {selectedPedido.metodoPago === 'efectivo' && selectedPedido.cambio && (
+                  <p>Cambio: ${selectedPedido.cambio}</p>
+                )}
+                {selectedPedido.observaciones && (
+                  <p className="mt-2">Observaciones: {selectedPedido.observaciones}</p>
+                )}
+              </div>
+              
+              <div className="border-t pt-4 mb-6">
+                <div className="flex justify-between text-xl font-bold">
+                  <span>Total:</span>
+                  <span>${selectedPedido.total}</span>
+                </div>
+              </div>
+              
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
