@@ -968,7 +968,6 @@ const handleSaveEdit = async (id) => {
   };
 
   try {
-    // CAMBIO: Usar query parameter en lugar de path
     await fetch(`${API_URL}/productos?id=${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -983,11 +982,16 @@ const handleSaveEdit = async (id) => {
 };
 
 const toggleDisponibilidad = async (id) => {
+  console.log('Toggle disponibilidad para ID:', id);
+  console.log('URL que se usará:', `${API_URL}/productos?id=${id}`);
+  
   const producto = productos.find(p => p.id === id);
+  console.log('Producto encontrado:', producto);
+  
   const updatedProduct = { ...producto, disponible: !producto.disponible };
+  console.log('Datos a enviar:', updatedProduct);
 
   try {
-    // CAMBIO: Usar query parameter en lugar de path
     await fetch(`${API_URL}/productos?id=${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

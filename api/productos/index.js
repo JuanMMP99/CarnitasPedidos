@@ -64,19 +64,14 @@ module.exports = async (req, res) => {
         .json({ message: "Producto creado exitosamente", data: rows[0] });
     }
 
-    // PUT - Actualizar producto existente
-    else if (req.method === "PUT") {
-      // Extraer ID de la URL path en lugar de query parameter
-      const pathParts = req.url.split("/");
-      const id = pathParts[pathParts.length - 1];
-
-      const { nombre, precio, disponible } = req.body;
-
-      if (!id || isNaN(id)) {
-        return res
-          .status(400)
-          .json({ error: "ID del producto es requerido y debe ser numérico" });
-      }
+// PUT - Actualizar producto existente
+else if (req.method === 'PUT') {
+  const { id } = req.query; // ← Esto es importante, recibe el ID del query parameter
+  const { nombre, precio, disponible } = req.body;
+  
+  if (!id) {
+    return res.status(400).json({ error: 'ID del producto es requerido' });
+  }
 
       // Verificar si el producto existe
       const productCheck = await pool.query(
