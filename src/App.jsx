@@ -65,9 +65,10 @@ function App() {
     }
   }, [API_URL]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    useEffect(() => {
+    console.log('Mesas cargadas:', mesas);
+    console.log('Pedidos cargados:', pedidos);
+  }, [mesas, pedidos]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
@@ -724,6 +725,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
 
   // Función corregida para seleccionar mesa
   const seleccionarMesa = (mesa) => {
+    console.log('Mesa seleccionada:', mesa.id, 'Número:', mesa.numero);
     setMesaSeleccionada(mesa.id);
     
     // Si la mesa está disponible, cambiar su estado a ocupada
@@ -737,31 +739,36 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
     cargarPedidoActivo(mesa.id);
   };
 
-  // Función para cargar pedido activo de una mesa (filtrado en frontend)
+  // Función para cargar pedido activo de una mesa
   const cargarPedidoActivo = (mesaId) => {
-    // Buscar en la lista de pedidos si hay alguno activo para esta mesa
-    const pedidoActivo = pedidos.find(pedido => 
-      pedido.tipo === 'interno' && 
-      pedido.mesaId === mesaId && 
-      pedido.estado !== 'entregado'
-    );
+    console.log('Buscando pedidos activos para mesa:', mesaId);
+    console.log('Todos los pedidos:', pedidos);
+    
+    // Buscar pedidos internos para esta mesa que no estén entregados
+    const pedidoActivo = pedidos.find(pedido => {
+      const isForThisMesa = pedido.tipo === 'interno' && pedido.mesaId === mesaId;
+      const isActive = pedido.estado !== 'entregado';
+      console.log(`Pedido ${pedido.id}: tipo=${pedido.tipo}, mesaId=${pedido.mesaId}, estado=${pedido.estado}, coincide=${isForThisMesa}, activo=${isActive}`);
+      return isForThisMesa && isActive;
+    });
     
     if (pedidoActivo) {
-      // Cargar los items del pedido activo en el carrito
+      console.log('Pedido activo encontrado:', pedidoActivo);
       setCarrito(pedidoActivo.items || []);
     } else {
-      // Si no hay pedido activo, limpiar el carrito
+      console.log('No se encontró pedido activo para esta mesa');
       setCarrito([]);
     }
   };
 
-  // Actualizar el carrito cuando cambia la mesa seleccionada o los pedidos
+  // Actualizar cuando cambia la mesa seleccionada o los pedidos
   useEffect(() => {
     if (mesaSeleccionada) {
       cargarPedidoActivo(mesaSeleccionada);
     }
   }, [mesaSeleccionada, pedidos]);
 
+  // Resto del código permanece igual...
   const agregarAlCarrito = (producto, cantidad, tipo, conVerdura) => {
     if (cantidad <= 0) return;
 
@@ -787,19 +794,15 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
 
     const nuevoPedidoData = {
       tipo: 'interno',
-      mesaId: mesaSeleccionada,
+      mesaId: mesaSeleccionada, // Este campo ahora se guardará en la BD
       items: carrito,
       total: calcularTotal(),
       estado: 'pendiente',
       fecha: new Date(),
-      // Campos de pedido externo en null
       cliente: null,
-      horaEntrega: null,
-      metodoPago: null,
-      pagoCon: null,
-      cambio: null,
-      observaciones: null,
     };
+
+    console.log('Enviando pedido:', nuevoPedidoData);
 
     try {
       const response = await fetch(`${API_URL}/pedidos`, {
@@ -813,14 +816,17 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
         throw new Error(errorData.error || 'Error al registrar el pedido');
       }
 
-      onPedidoFinalizado(); // Recarga todos los datos
+      const result = await response.json();
+      console.log('Pedido creado con ID:', result.id);
+      
+      onPedidoFinalizado();
       setCarrito([]);
       setShowResumen(false);
       
       alert('Pedido registrado para la mesa');
     } catch (error) {
       console.error('Error al finalizar pedido:', error);
-      alert('Hubo un error al registrar el pedido para la mesa: ' + error.message);
+      alert('Hubo un error al registrar el pedido: ' + error.message);
     }
   };
 

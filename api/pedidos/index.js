@@ -19,15 +19,24 @@ module.exports = async (req, res) => {
     } 
     else if (req.method === 'POST') {
       const data = req.body;
-      const sql = `INSERT INTO pedidos (tipo, cliente, items, total, estado, fecha) 
-                   VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
+      
+      // Actualizar la consulta SQL para incluir mesaId
+      const sql = `INSERT INTO pedidos (tipo, cliente, items, total, estado, fecha, "mesaId") 
+                   VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`;
+      
       const result = await pool.query(sql, [
-        data.tipo, data.cliente, JSON.stringify(data.items), data.total, 'pendiente', new Date()
+        data.tipo, 
+        data.cliente ? JSON.stringify(data.cliente) : null, 
+        JSON.stringify(data.items), 
+        data.total, 
+        'pendiente', 
+        new Date(),
+        data.mesaId || null  // Incluir mesaId (puede ser null para pedidos externos)
       ]);
+      
       res.json({ message: "success", id: result.rows[0].id });
     }
     else if (req.method === 'PUT') {
-      // Obtener el ID del query parameter (/?id=5)
       const { id } = req.query;
       const { estado } = req.body;
 
@@ -37,7 +46,6 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'ID del pedido es requerido' });
       }
 
-      // Actualizar solo el estado del pedido
       const sql = `UPDATE pedidos SET estado = $1 WHERE id = $2 RETURNING *`;
       const result = await pool.query(sql, [estado, id]);
 
