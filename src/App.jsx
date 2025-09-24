@@ -14,7 +14,6 @@ function App() {
     // { id: 4, numero: 4, estado: 'disponible', tipo: null, pedidoActual: null },
   ]);
   const [productos, setProductos] = useState([]);
-  const [sabores, setSabores] = useState([]);
 
   // En producción, la API estará en la misma URL, bajo la ruta /api
   // En desarrollo, podemos usar un proxy o mantener la URL completa.
@@ -26,14 +25,13 @@ function App() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [productosRes, mesasRes, pedidosRes, saboresRes] = await Promise.all([
+      const [productosRes, mesasRes, pedidosRes] = await Promise.all([
         fetch(`${API_URL}/productos`),
         fetch(`${API_URL}/mesas`),
         fetch(`${API_URL}/pedidos`),
-        fetch(`${API_URL}/sabores`) // Nueva llamada
       ]);
 
-      // Verificar si las respuestas son exitosas y lanzar un error si no lo son.
+      // Verificar si las respuestas son exitosas y lanzar un error si no lo son
       if (!productosRes.ok) {
         throw new Error(`Error al obtener productos: ${productosRes.status} ${productosRes.statusText}`);
       }
@@ -43,30 +41,24 @@ function App() {
       if (!pedidosRes.ok) {
         throw new Error(`Error al obtener pedidos: ${pedidosRes.status} ${pedidosRes.statusText}`);
       }
-      if (!saboresRes.ok) {
-        throw new Error(`Error al obtener sabores: ${saboresRes.status} ${saboresRes.statusText}`);
-      }
 
       const productosData = await productosRes.json();
       const mesasData = await mesasRes.json();
       const pedidosData = await pedidosRes.json();
-      const saboresData = await saboresRes.json();
 
       // Asegurarnos de que siempre asignamos un array
       setProductos(productosData?.data || []);
       setMesas(mesasData?.data || []);
       setPedidos(pedidosData?.data || []);
-      setSabores(saboresData?.data || []);
 
     } catch (error) {
       console.error("Error fetching data:", error);
-      // Inicializar con arrays vacíos para evitar errores en la UI si la carga inicial falla.
+      // Inicializar con arrays vacíos para evitar errores en la UI si la carga inicial falla
       setProductos([]);
       setMesas([]);
       setPedidos([]);
-      setSabores([]);
 
-      // Mostrar una alerta más útil al usuario en el entorno de desarrollo.
+      // Mostrar una alerta más útil al usuario en el entorno de desarrollo
       if (process.env.NODE_ENV === 'development') {
         alert(`Error cargando datos: ${error.message}. Revisa la consola del navegador (F12) y la terminal de tu servidor backend para más detalles.`);
       }
@@ -103,7 +95,7 @@ function App() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <PedidoInterno productos={productos} sabores={sabores} mesas={mesas} setMesas={setMesas} onPedidoFinalizado={fetchData} API_URL={API_URL} />
+              <PedidoInterno productos={productos} mesas={mesas} setMesas={setMesas} onPedidoFinalizado={fetchData} API_URL={API_URL} />
             </motion.div>
           )}
 
@@ -115,7 +107,7 @@ function App() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <AdminPanel productos={productos} setProductos={setProductos} sabores={sabores} setSabores={setSabores} pedidos={pedidos} mesas={mesas} onDataChange={fetchData} API_URL={API_URL} />
+              <AdminPanel productos={productos} setProductos={setProductos} pedidos={pedidos} mesas={mesas} onDataChange={fetchData} API_URL={API_URL} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -283,7 +275,7 @@ const GroupedProductSelector = ({ categoria, productos, onAgregar }) => {
   );
 };
 
-const PedidoExterno = ({ productos, sabores, onPedidoConfirmado, API_URL }) => {
+const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
   const [cliente, setCliente] = useState({
     nombre: '',
     telefono: '',
@@ -308,7 +300,7 @@ const PedidoExterno = ({ productos, sabores, onPedidoConfirmado, API_URL }) => {
       nombre: producto.nombre,
       precio: producto.precio,
       cantidad,
-      tipo: tipo,
+      tipo: producto.tipos ? tipo : null,
       conVerdura: producto.categoria === 'taco' || producto.categoria === 'torta' ? conVerdura : null
     };
 
@@ -725,7 +717,7 @@ const ProductoSelector = ({ producto, onAgregar }) => {
   );
 };
 
-const PedidoInterno = ({ productos, sabores, mesas, setMesas, onPedidoFinalizado, API_URL }) => {
+const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL }) => {
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
   const [carrito, setCarrito] = useState([]);
   const [showResumen, setShowResumen] = useState(false);
@@ -750,7 +742,7 @@ const PedidoInterno = ({ productos, sabores, mesas, setMesas, onPedidoFinalizado
       nombre: producto.nombre,
       precio: producto.precio,
       cantidad,
-      tipo: tipo,
+      tipo: producto.tipos ? tipo : null,
       conVerdura: producto.categoria === 'taco' || producto.categoria === 'torta' ? conVerdura : null
     };
 
@@ -844,8 +836,7 @@ const PedidoInterno = ({ productos, sabores, mesas, setMesas, onPedidoFinalizado
             <div className="space-y-4">
               {productos.filter(p => p.categoria === 'taco' || p.categoria === 'torta').map(producto => (
                 <ProductoSelector
-                    key={producto.id}
-                    sabores={sabores}
+                  key={producto.id}
                   producto={producto}
                   onAgregar={agregarAlCarrito}
                 />
@@ -940,7 +931,7 @@ const PedidoInterno = ({ productos, sabores, mesas, setMesas, onPedidoFinalizado
   );
 };
 
-const AdminPanel = ({ productos, setProductos, sabores, setSabores, pedidos, mesas, onDataChange, API_URL }) => {
+const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API_URL }) => {
   const [filtroPedidos, setFiltroPedidos] = useState('todos');
   const [editingProductId, setEditingProductId] = useState(null);
   const [selectedPedido, setSelectedPedido] = useState(null);
