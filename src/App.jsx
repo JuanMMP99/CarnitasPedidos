@@ -19,51 +19,51 @@ function App() {
   // En desarrollo, podemos usar un proxy o mantener la URL completa.
   // En producción, la API estará en la misma URL, bajo la ruta /api
   // En desarrollo, podemos usar un proxy o mantener la URL completa.
-  const API_URL = process.env.NODE_ENV === 'development' 
+  const API_URL = process.env.NODE_ENV === 'development'
     ? 'http://localhost:3001/api'  // Si pruebas localmente con un servidor
     : '/api';  // En producción en Vercel
 
   const fetchData = useCallback(async () => {
-  try {
-    const [productosRes, mesasRes, pedidosRes] = await Promise.all([
-      fetch(`${API_URL}/productos`),
-      fetch(`${API_URL}/mesas`),
-      fetch(`${API_URL}/pedidos`),
-    ]);
+    try {
+      const [productosRes, mesasRes, pedidosRes] = await Promise.all([
+        fetch(`${API_URL}/productos`),
+        fetch(`${API_URL}/mesas`),
+        fetch(`${API_URL}/pedidos`),
+      ]);
 
-    // Verificar si las respuestas son exitosas y lanzar un error si no lo son
-    if (!productosRes.ok) { 
-      throw new Error(`Error al obtener productos: ${productosRes.status} ${productosRes.statusText}`); 
-    }
-    if (!mesasRes.ok) { 
-      throw new Error(`Error al obtener mesas: ${mesasRes.status} ${mesasRes.statusText}`); 
-    }
-    if (!pedidosRes.ok) { 
-      throw new Error(`Error al obtener pedidos: ${pedidosRes.status} ${pedidosRes.statusText}`); 
-    }
-    
-    const productosData = await productosRes.json();
-    const mesasData = await mesasRes.json();
-    const pedidosData = await pedidosRes.json();
-        
-    // Asegurarnos de que siempre asignamos un array
-    setProductos(productosData?.data || []);
-    setMesas(mesasData?.data || []);
-    setPedidos(pedidosData?.data || []);
+      // Verificar si las respuestas son exitosas y lanzar un error si no lo son
+      if (!productosRes.ok) {
+        throw new Error(`Error al obtener productos: ${productosRes.status} ${productosRes.statusText}`);
+      }
+      if (!mesasRes.ok) {
+        throw new Error(`Error al obtener mesas: ${mesasRes.status} ${mesasRes.statusText}`);
+      }
+      if (!pedidosRes.ok) {
+        throw new Error(`Error al obtener pedidos: ${pedidosRes.status} ${pedidosRes.statusText}`);
+      }
 
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    // Inicializar con arrays vacíos para evitar errores en la UI si la carga inicial falla
-    setProductos([]);
-    setMesas([]);
-    setPedidos([]);
+      const productosData = await productosRes.json();
+      const mesasData = await mesasRes.json();
+      const pedidosData = await pedidosRes.json();
 
-    // Mostrar una alerta más útil al usuario en el entorno de desarrollo
-    if (process.env.NODE_ENV === 'development') {
-      alert(`Error cargando datos: ${error.message}. Revisa la consola del navegador (F12) y la terminal de tu servidor backend para más detalles.`);
+      // Asegurarnos de que siempre asignamos un array
+      setProductos(productosData?.data || []);
+      setMesas(mesasData?.data || []);
+      setPedidos(pedidosData?.data || []);
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // Inicializar con arrays vacíos para evitar errores en la UI si la carga inicial falla
+      setProductos([]);
+      setMesas([]);
+      setPedidos([]);
+
+      // Mostrar una alerta más útil al usuario en el entorno de desarrollo
+      if (process.env.NODE_ENV === 'development') {
+        alert(`Error cargando datos: ${error.message}. Revisa la consola del navegador (F12) y la terminal de tu servidor backend para más detalles.`);
+      }
     }
-  }
-}, [API_URL]);
+  }, [API_URL]);
 
   useEffect(() => {
     fetchData();
@@ -72,7 +72,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+
       <main className="flex-1 pt-20 pb-24 px-4 overflow-auto">
         <AnimatePresence mode="wait">
           {activeTab === 'externo' && (
@@ -86,7 +86,7 @@ function App() {
               <PedidoExterno productos={productos} onPedidoConfirmado={fetchData} API_URL={API_URL} />
             </motion.div>
           )}
-          
+
           {activeTab === 'interno' && (
             <motion.div
               key="interno"
@@ -98,7 +98,7 @@ function App() {
               <PedidoInterno productos={productos} mesas={mesas} setMesas={setMesas} onPedidoFinalizado={fetchData} API_URL={API_URL} />
             </motion.div>
           )}
-          
+
           {activeTab === 'admin' && (
             <motion.div
               key="admin"
@@ -112,7 +112,7 @@ function App() {
           )}
         </AnimatePresence>
       </main>
-      
+
       <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
@@ -120,24 +120,24 @@ function App() {
 
 const Header = ({ activeTab, setActiveTab }) => {
   const [fecha, setFecha] = useState(new Date());
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setFecha(new Date());
     }, 60000);
-    
+
     return () => clearInterval(timer);
   }, []);
-  
+
   const formatDate = (date) => {
-    return date.toLocaleDateString('es-MX', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('es-MX', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
-  
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4 flex justify-between items-center">
       <div className="flex items-center">
@@ -147,21 +147,21 @@ const Header = ({ activeTab, setActiveTab }) => {
           <p className="text-sm text-gray-500">{formatDate(fecha)}</p>
         </div>
       </div>
-      
+
       <div className="flex space-x-2">
-        <button 
+        <button
           className={`px-3 py-1 rounded-full text-sm font-medium ${activeTab === 'externo' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
           onClick={() => setActiveTab('externo')}
         >
           Externo
         </button>
-        <button 
+        <button
           className={`px-3 py-1 rounded-full text-sm font-medium ${activeTab === 'interno' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
           onClick={() => setActiveTab('interno')}
         >
           Interno
         </button>
-        <button 
+        <button
           className={`px-3 py-1 rounded-full text-sm font-medium ${activeTab === 'admin' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
           onClick={() => setActiveTab('admin')}
         >
@@ -175,7 +175,7 @@ const Header = ({ activeTab, setActiveTab }) => {
 const TabBar = ({ activeTab, setActiveTab }) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3">
-      <button 
+      <button
         className={`flex flex-col items-center ${activeTab === 'externo' ? 'text-orange-500' : 'text-gray-500'}`}
         onClick={() => setActiveTab('externo')}
       >
@@ -184,8 +184,8 @@ const TabBar = ({ activeTab, setActiveTab }) => {
         </svg>
         <span className="text-xs mt-1">Externo</span>
       </button>
-      
-      <button 
+
+      <button
         className={`flex flex-col items-center ${activeTab === 'interno' ? 'text-orange-500' : 'text-gray-500'}`}
         onClick={() => setActiveTab('interno')}
       >
@@ -194,8 +194,8 @@ const TabBar = ({ activeTab, setActiveTab }) => {
         </svg>
         <span className="text-xs mt-1">Interno</span>
       </button>
-      
-      <button 
+
+      <button
         className={`flex flex-col items-center ${activeTab === 'admin' ? 'text-orange-500' : 'text-gray-500'}`}
         onClick={() => setActiveTab('admin')}
       >
@@ -232,16 +232,16 @@ const GroupedProductSelector = ({ categoria, productos, onAgregar }) => {
             ${productos.find(p => p.id === parseInt(selectedProductId))?.precio || 0}
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <button 
+          <button
             onClick={() => setCantidad(Math.max(1, cantidad - 1))}
             className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
           >
             -
           </button>
           <span className="w-10 text-center font-medium">{cantidad}</span>
-          <button 
+          <button
             onClick={() => setCantidad(cantidad + 1)}
             className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
           >
@@ -249,7 +249,7 @@ const GroupedProductSelector = ({ categoria, productos, onAgregar }) => {
           </button>
         </div>
       </div>
-      
+
       <div className="mb-2">
         <label className="block text-sm text-gray-600 mb-1">Opción:</label>
         <select
@@ -264,7 +264,7 @@ const GroupedProductSelector = ({ categoria, productos, onAgregar }) => {
           ))}
         </select>
       </div>
-      
+
       <button
         onClick={handleAgregar}
         className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold"
@@ -293,7 +293,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
 
   const agregarAlCarrito = (producto, cantidad, tipo, conVerdura) => {
     if (cantidad <= 0) return;
-    
+
     const nuevoItem = {
       id: Date.now(),
       productoId: producto.id,
@@ -303,7 +303,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
       tipo: producto.tipos ? tipo : null,
       conVerdura: producto.categoria === 'taco' || producto.categoria === 'torta' ? conVerdura : null
     };
-    
+
     setCarrito([...carrito, nuevoItem]);
   };
 
@@ -344,7 +344,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
         body: JSON.stringify(nuevoPedidoData),
       });
       if (!response.ok) throw new Error('Network response was not ok');
-      
+
       // Resetear formulario y actualizar lista de pedidos
       onPedidoConfirmado();
       setCarrito([]);
@@ -366,33 +366,33 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-orange-500">Pedido para Llevar/Domicilio</h2>
-      
+
       <div className="bg-white rounded-xl shadow-md p-4 mb-6">
         <h3 className="font-semibold mb-3 text-gray-800">Información del Cliente</h3>
-        
+
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
             <input
               type="text"
               value={cliente.nombre}
-              onChange={(e) => setCliente({...cliente, nombre: e.target.value})}
+              onChange={(e) => setCliente({ ...cliente, nombre: e.target.value })}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
               placeholder="Nombre del cliente"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
             <input
               type="tel"
               value={cliente.telefono}
-              onChange={(e) => setCliente({...cliente, telefono: e.target.value})}
+              onChange={(e) => setCliente({ ...cliente, telefono: e.target.value })}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
               placeholder="Número de teléfono"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de entrega</label>
             <div className="flex space-x-4">
@@ -400,7 +400,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
                 <input
                   type="radio"
                   checked={cliente.tipoEntrega === 'recoger'}
-                  onChange={() => setCliente({...cliente, tipoEntrega: 'recoger'})}
+                  onChange={() => setCliente({ ...cliente, tipoEntrega: 'recoger' })}
                   className="text-orange-500 focus:ring-orange-500"
                 />
                 <span className="ml-2">Para recoger</span>
@@ -409,21 +409,21 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
                 <input
                   type="radio"
                   checked={cliente.tipoEntrega === 'domicilio'}
-                  onChange={() => setCliente({...cliente, tipoEntrega: 'domicilio'})}
+                  onChange={() => setCliente({ ...cliente, tipoEntrega: 'domicilio' })}
                   className="text-orange-500 focus:ring-orange-500"
                 />
                 <span className="ml-2">Domicilio</span>
               </label>
             </div>
           </div>
-          
+
           {cliente.tipoEntrega === 'domicilio' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
               <input
                 type="text"
                 value={cliente.direccion}
-                onChange={(e) => setCliente({...cliente, direccion: e.target.value})}
+                onChange={(e) => setCliente({ ...cliente, direccion: e.target.value })}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Dirección completa"
               />
@@ -459,34 +459,34 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
           )}
         </div>
       </div>
-      
+
       <div className="bg-white rounded-xl shadow-md p-4 mb-6">
         <h3 className="font-semibold mb-3 text-gray-800">Productos</h3>
-        
+
         <div className="space-y-4">
           {productos.filter(p => p.categoria === 'taco' || p.categoria === 'torta').map(producto => (
-              <ProductoSelector 
-                key={producto.id} 
-                producto={producto} 
-                onAgregar={agregarAlCarrito} 
-              />
-            ))}
-            <GroupedProductSelector
-              categoria="Carnitas por Kilo"
-              productos={productos.filter(p => p.categoria === 'carnitas')}
+            <ProductoSelector
+              key={producto.id}
+              producto={producto}
               onAgregar={agregarAlCarrito}
             />
-            <GroupedProductSelector
-              categoria="Bebidas"
-              productos={productos.filter(p => p.categoria === 'bebida')}
-              onAgregar={agregarAlCarrito}
-            />
+          ))}
+          <GroupedProductSelector
+            categoria="Carnitas por Kilo"
+            productos={productos.filter(p => p.categoria === 'carnitas')}
+            onAgregar={agregarAlCarrito}
+          />
+          <GroupedProductSelector
+            categoria="Bebidas"
+            productos={productos.filter(p => p.categoria === 'bebida')}
+            onAgregar={agregarAlCarrito}
+          />
         </div>
       </div>
-      
+
       <div className="bg-white rounded-xl shadow-md p-4 mb-6">
         <h3 className="font-semibold mb-3 text-gray-800">Detalles de Entrega</h3>
-        
+
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Hora deseada</label>
@@ -497,7 +497,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Método de pago</label>
             <select
@@ -509,7 +509,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
               <option value="transferencia">Transferencia</option>
             </select>
           </div>
-          
+
           {metodoPago === 'efectivo' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">¿Con cuánto paga?</label>
@@ -522,7 +522,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
               />
             </div>
           )}
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
             <textarea
@@ -535,7 +535,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
           </div>
         </div>
       </div>
-      
+
       {carrito.length > 0 && (
         <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
           <div className="flex justify-between items-center">
@@ -552,7 +552,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
           </div>
         </div>
       )}
-      
+
       <AnimatePresence>
         {showResumen && (
           <motion.div
@@ -570,14 +570,14 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-xl font-bold mb-4 text-orange-500">Resumen del Pedido</h3>
-              
+
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Cliente:</h4>
                 <p>{cliente.nombre} - {cliente.telefono}</p>
                 {cliente.tipoEntrega === 'domicilio' && <p>{cliente.direccion}</p>}
                 <p className="capitalize">{cliente.tipoEntrega}</p>
               </div>
-              
+
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Productos:</h4>
                 <ul className="space-y-2">
@@ -601,7 +601,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
                   </div>
                 )}
               </div>
-              
+
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
                 <p>Hora: {horaEntrega || 'Lo antes posible'}</p>
@@ -613,14 +613,14 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
                   <p className="mt-2">Observaciones: {observaciones}</p>
                 )}
               </div>
-              
+
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between text-xl font-bold">
                   <span>Total:</span>
                   <span>${calcularTotal()}</span>
                 </div>
               </div>
-              
+
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowResumen(false)}
@@ -647,12 +647,12 @@ const ProductoSelector = ({ producto, onAgregar }) => {
   const [cantidad, setCantidad] = useState(1);
   const [tipoSeleccionado, setTipoSeleccionado] = useState(producto.tipos ? producto.tipos[0] : '');
   const [conVerdura, setConVerdura] = useState(true);
-  
+
   const handleAgregar = () => {
     onAgregar(producto, cantidad, tipoSeleccionado, conVerdura);
     setCantidad(1);
   };
-  
+
   return (
     <div className="border border-gray-200 rounded-lg p-3">
       <div className="flex justify-between items-start mb-2">
@@ -660,16 +660,16 @@ const ProductoSelector = ({ producto, onAgregar }) => {
           <h4 className="font-semibold">{producto.nombre}</h4>
           <p className="text-orange-500 font-bold">${producto.precio}</p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <button 
+          <button
             onClick={() => setCantidad(Math.max(1, cantidad - 1))}
             className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
           >
             -
           </button>
           <span className="w-10 text-center font-medium">{cantidad}</span>
-          <button 
+          <button
             onClick={() => setCantidad(cantidad + 1)}
             className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
           >
@@ -677,7 +677,7 @@ const ProductoSelector = ({ producto, onAgregar }) => {
           </button>
         </div>
       </div>
-      
+
       {producto.tipos && (
         <div className="mb-2">
           <label className="block text-sm text-gray-600 mb-1">Tipo:</label>
@@ -692,7 +692,7 @@ const ProductoSelector = ({ producto, onAgregar }) => {
           </select>
         </div>
       )}
-      
+
       {(producto.categoria === 'taco' || producto.categoria === 'torta') && (
         <div className="flex items-center mb-3">
           <label className="inline-flex items-center">
@@ -706,7 +706,7 @@ const ProductoSelector = ({ producto, onAgregar }) => {
           </label>
         </div>
       )}
-      
+
       <button
         onClick={handleAgregar}
         className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold"
@@ -725,17 +725,17 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
   const seleccionarMesa = (mesa) => {
     if (mesa.estado === 'disponible') {
       setMesaSeleccionada(mesa.id);
-      setMesas(mesas.map(m => 
-        m.id === mesa.id ? {...m, estado: 'ocupada'} : m
+      setMesas(mesas.map(m =>
+        m.id === mesa.id ? { ...m, estado: 'ocupada' } : m
       ));
     } else {
       setMesaSeleccionada(mesa.id);
     }
   };
-  
+
   const agregarAlCarrito = (producto, cantidad, tipo, conVerdura) => {
     if (cantidad <= 0) return;
-    
+
     const nuevoItem = {
       id: Date.now(),
       productoId: producto.id,
@@ -745,17 +745,17 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
       tipo: producto.tipos ? tipo : null,
       conVerdura: producto.categoria === 'taco' || producto.categoria === 'torta' ? conVerdura : null
     };
-    
+
     setCarrito([...carrito, nuevoItem]);
   };
-  
+
   const calcularTotal = () => {
     return carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
   };
-  
+
   const finalizarPedido = async () => {
     if (!mesaSeleccionada || carrito.length === 0) return;
-    
+
     const nuevoPedidoData = {
       id: Date.now(),
       tipo: 'interno',
@@ -780,7 +780,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
         body: JSON.stringify(nuevoPedidoData),
       });
       if (!response.ok) throw new Error('Error al registrar el pedido');
-      
+
       onPedidoFinalizado(); // Recarga todos los datos
       setCarrito([]);
       setShowResumen(false); // Cierra el modal de resumen
@@ -788,37 +788,36 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
       console.error('Error al finalizar pedido:', error);
       alert('Hubo un error al registrar el pedido para la mesa.');
     }
-    
+
     alert('Pedido registrado para la mesa');
   };
-  
+
   const liberarMesa = () => {
-    setMesas(mesas.map(m => 
-      m.id === mesaSeleccionada ? {...m, estado: 'disponible', pedidoActual: null} : m
+    setMesas(mesas.map(m =>
+      m.id === mesaSeleccionada ? { ...m, estado: 'disponible', pedidoActual: null } : m
     ));
     setMesaSeleccionada(null);
     setCarrito([]);
   };
-  
+
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-orange-500">Pedidos Internos</h2>
-      
+
       <div className="bg-white rounded-xl shadow-md p-4 mb-6">
         <h3 className="font-semibold mb-3 text-gray-800">Mesas</h3>
-        
+
         <div className="grid grid-cols-2 gap-3">
           {mesas.map(mesa => (
             <div
               key={mesa.id}
               onClick={() => seleccionarMesa(mesa)}
-              className={`p-4 rounded-lg border-2 text-center cursor-pointer ${
-                mesaSeleccionada === mesa.id 
-                  ? 'border-orange-500 bg-orange-50' 
-                  : mesa.estado === 'ocupada'
-                    ? 'border-red-500 bg-red-50'
-                    : 'border-green-500 bg-green-50'
-              }`}
+              className={`p-4 rounded-lg border-2 text-center cursor-pointer ${mesaSeleccionada === mesa.id
+                ? 'border-orange-500 bg-orange-50'
+                : mesa.estado === 'ocupada'
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-green-500 bg-green-50'
+                }`}
             >
               <div className="text-lg font-bold">Mesa {mesa.numero}</div>
               <div className="text-sm capitalize">
@@ -828,30 +827,30 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
           ))}
         </div>
       </div>
-      
+
       {mesaSeleccionada && (
         <>
           <div className="bg-white rounded-xl shadow-md p-4 mb-6">
             <h3 className="font-semibold mb-3 text-gray-800">Productos para Mesa {mesas.find(m => m.id === mesaSeleccionada).numero}</h3>
-            
+
             <div className="space-y-4">
               {productos.filter(p => p.categoria === 'taco' || p.categoria === 'torta').map(producto => (
-                  <ProductoSelector 
-                    key={producto.id} 
-                    producto={producto} 
-                    onAgregar={agregarAlCarrito} 
-                  />
-                ))}
-                <GroupedProductSelector
-                  categoria="Carnitas por Kilo"
-                  productos={productos.filter(p => p.categoria === 'carnitas')}
+                <ProductoSelector
+                  key={producto.id}
+                  producto={producto}
                   onAgregar={agregarAlCarrito}
                 />
-                <GroupedProductSelector
-                  categoria="Bebidas"
-                  productos={productos.filter(p => p.categoria === 'bebida')}
-                  onAgregar={agregarAlCarrito}
-                />
+              ))}
+              <GroupedProductSelector
+                categoria="Carnitas por Kilo"
+                productos={productos.filter(p => p.categoria === 'carnitas')}
+                onAgregar={agregarAlCarrito}
+              />
+              <GroupedProductSelector
+                categoria="Bebidas"
+                productos={productos.filter(p => p.categoria === 'bebida')}
+                onAgregar={agregarAlCarrito}
+              />
             </div>
           </div>
 
@@ -917,7 +916,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <div className="flex space-x-3 mt-4">
             <button
               onClick={liberarMesa}
@@ -945,10 +944,10 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
     disponible: true
   });
 
-  const pedidosFiltrados = filtroPedidos === 'todos' 
-    ? pedidos 
+  const pedidosFiltrados = filtroPedidos === 'todos'
+    ? pedidos
     : pedidos.filter(p => p.tipo === filtroPedidos);
-  
+
   const handleEditClick = (producto) => {
     setEditingProductId(producto.id);
     setEditedProductData({ nombre: producto.nombre, precio: producto.precio });
@@ -959,46 +958,46 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
     setEditedProductData({ nombre: '', precio: '' });
   };
 
-const handleSaveEdit = async (id) => {
-  const productoOriginal = productos.find(p => p.id === id);
-  const updatedProduct = { 
-    ...productoOriginal, 
-    nombre: editedProductData.nombre, 
-    precio: parseFloat(editedProductData.precio) 
+  const handleSaveEdit = async (id) => {
+    const productoOriginal = productos.find(p => p.id === id);
+    const updatedProduct = {
+      ...productoOriginal,
+      nombre: editedProductData.nombre,
+      precio: parseFloat(editedProductData.precio)
+    };
+
+    try {
+      await fetch(`${API_URL}/productos?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProduct)
+      });
+      onDataChange(); // Recargar datos
+      handleCancelEdit();
+    } catch (error) {
+      console.error("Error al guardar producto:", error);
+      alert('Error al guardar el producto. Revisa la consola para más detalles.');
+    }
   };
 
-  try {
-    await fetch(`${API_URL}/productos?id=${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedProduct)
-    });
-    onDataChange(); // Recargar datos
-    handleCancelEdit();
-  } catch (error) {
-    console.error("Error al guardar producto:", error);
-    alert('Error al guardar el producto. Revisa la consola para más detalles.');
-  }
-};
+  const toggleDisponibilidad = async (id) => {
 
-const toggleDisponibilidad = async (id) => {
-  
-  const producto = productos.find(p => p.id === id);
-  
-  const updatedProduct = { ...producto, disponible: !producto.disponible };
+    const producto = productos.find(p => p.id === id);
 
-  try {
-    await fetch(`${API_URL}/productos?id=${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedProduct)
-    });
-    onDataChange(); // Recargar datos
-  } catch (error) {
-    console.error("Error al cambiar disponibilidad:", error);
-    alert('Error al cambiar la disponibilidad. Revisa la consola para más detalles.');
-  }
-};
+    const updatedProduct = { ...producto, disponible: !producto.disponible };
+
+    try {
+      await fetch(`${API_URL}/productos?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProduct)
+      });
+      onDataChange(); // Recargar datos
+    } catch (error) {
+      console.error("Error al cambiar disponibilidad:", error);
+      alert('Error al cambiar la disponibilidad. Revisa la consola para más detalles.');
+    }
+  };
 
   const handleNewProductChange = (e) => {
     const { name, value } = e.target;
@@ -1035,67 +1034,67 @@ const toggleDisponibilidad = async (id) => {
 
     alert('¡Producto creado con éxito!');
   };
-  
+
   const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
-  e.stopPropagation();
-  console.log('🔧 Cambiando estado del pedido:', { id, nuevoEstado });
-  
-  try {
-    // Usar query parameter como espera el backend
-    const response = await fetch(`${API_URL}/pedidos?id=${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ estado: nuevoEstado })
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error ${response.status}: ${errorText}`);
+    e.stopPropagation();
+    console.log('🔧 Cambiando estado del pedido:', { id, nuevoEstado });
+
+    try {
+      // Usar query parameter como espera el backend
+      const response = await fetch(`${API_URL}/pedidos?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: nuevoEstado })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Estado cambiado exitosamente:', result);
+
+      onDataChange(); // Recargar datos
+
+    } catch (error) {
+      console.error("❌ Error al cambiar el estado del pedido:", error);
+      alert('Error al actualizar el estado. Revisa la consola para más detalles.');
     }
-    
-    const result = await response.json();
-    console.log('✅ Estado cambiado exitosamente:', result);
-    
-    onDataChange(); // Recargar datos
-    
-  } catch (error) {
-    console.error("❌ Error al cambiar el estado del pedido:", error);
-    alert('Error al actualizar el estado. Revisa la consola para más detalles.');
-  }
-};
-  
+  };
+
   return (
     <div className="max-w-lg mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-orange-500">Panel de Administración</h2>
-      
+
       <div className="bg-white rounded-xl shadow-md p-4 mb-6">
         <h3 className="font-semibold mb-3 text-gray-800">Control de Pedidos</h3>
-        
+
         <div className="flex space-x-2 mb-4">
           <button
             onClick={() => setFiltroPedidos('todos')}
-className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'todos' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
+            className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'todos' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
           >
             Todos
           </button>
           <button
             onClick={() => setFiltroPedidos('externo')}
-className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'externo' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
+            className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'externo' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
           >
             Externos
           </button>
           <button
             onClick={() => setFiltroPedidos('interno')}
-className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
+            className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
           >
             Internos
           </button>
         </div>
-        
+
         <div className="space-y-3 max-h-60 overflow-y-auto">
           {pedidosFiltrados.map(pedido => (
-            <div 
-              key={pedido.id} 
+            <div
+              key={pedido.id}
               className="p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
               onClick={() => setSelectedPedido(pedido)}
             >
@@ -1108,45 +1107,37 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
                     {new Date(pedido.fecha).toLocaleString('es-MX')}
                   </p>
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded capitalize ${
-                  pedido.estado === 'entregado' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-orange-100 text-orange-800'
-                }`}>
+                <span className={`text-xs font-medium px-2 py-1 rounded capitalize ${pedido.estado === 'entregado'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-orange-100 text-orange-800'
+                  }`}>
                   {pedido.estado}
                 </span>
               </div>
-              
+
               <div className="text-sm mb-2">
                 {pedido.tipo === 'externo' && (
                   <p>{pedido.cliente.nombre} - {pedido.cliente.telefono}</p>
                 )}
                 <p>{pedido.items.length} producto(s) - ${pedido.total}</p>
               </div>
-              
+
               <div className="flex space-x-2">
                 <select
-  value={pedido.estado}
-  onChange={(e) => {
-    console.log('🔧 Cambiando estado del pedido:', {
-      id: pedido.id,
-      estadoActual: pedido.estado,
-      nuevoEstado: e.target.value,
-      API_URL: API_URL
-    });
-    cambiarEstadoPedido(e, pedido.id, e.target.value);
-  }}
-  className="text-xs p-1 border rounded"
->
-  <option value="pendiente">Pendiente</option>
-  <option value="preparacion">En preparación</option>
-  <option value="listo">Listo</option>
-  <option value="entregado">Entregado</option>
-</select>
+                  value={pedido.estado}
+                  onChange={(e) => cambiarEstadoPedido(e, pedido.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()} // ← Esta línea resuelve el problema
+                  className="text-xs p-1 border rounded"
+                >
+                  <option value="pendiente">Pendiente</option>
+                  <option value="preparacion">En preparación</option>
+                  <option value="listo">Listo</option>
+                  <option value="entregado">Entregado</option>
+                </select>
               </div>
             </div>
           ))}
-          
+
           {pedidosFiltrados.length === 0 && (
             <p className="text-center text-gray-500 py-4">No hay pedidos</p>
           )}
@@ -1155,16 +1146,15 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
 
       <div className="bg-white rounded-xl shadow-md p-4 mb-6">
         <h3 className="font-semibold mb-3 text-gray-800">Gestión de Mesas</h3>
-        
+
         <div className="grid grid-cols-2 gap-3">
           {mesas.map(mesa => (
             <div
               key={mesa.id}
-              className={`p-3 rounded-lg border text-center ${
-                mesa.estado === 'ocupada' 
-                  ? 'border-red-500 bg-red-50' 
-                  : 'border-green-500 bg-green-50'
-              }`}
+              className={`p-3 rounded-lg border text-center ${mesa.estado === 'ocupada'
+                ? 'border-red-500 bg-red-50'
+                : 'border-green-500 bg-green-50'
+                }`}
             >
               <div className="font-bold">Mesa {mesa.numero}</div>
               <div className="text-sm capitalize">{mesa.estado}</div>
@@ -1211,17 +1201,17 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
 
       <div className="bg-white rounded-xl shadow-md p-4 mb-6">
         <h3 className="font-semibold mb-3 text-gray-800">Gestión de Menú</h3>
-        
+
         <div className="space-y-3">
-{productos.map(producto =>
+          {productos.map(producto =>
             editingProductId === producto.id ? (
               <div key={producto.id} className="p-3 border border-orange-300 rounded-lg bg-orange-50">
                 <div className="flex items-center mb-2">
-                  <input type="text" value={editedProductData.nombre} onChange={(e) => setEditedProductData({...editedProductData, nombre: e.target.value})} className="w-full p-2 border border-gray-300 rounded-lg" />
+                  <input type="text" value={editedProductData.nombre} onChange={(e) => setEditedProductData({ ...editedProductData, nombre: e.target.value })} className="w-full p-2 border border-gray-300 rounded-lg" />
                 </div>
                 <div className="flex items-center mb-3">
                   <span className="mr-2">$</span>
-                  <input type="number" value={editedProductData.precio} onChange={(e) => setEditedProductData({...editedProductData, precio: e.target.value})} className="w-24 p-2 border border-gray-300 rounded-lg" />
+                  <input type="number" value={editedProductData.precio} onChange={(e) => setEditedProductData({ ...editedProductData, precio: e.target.value })} className="w-24 p-2 border border-gray-300 rounded-lg" />
                 </div>
                 <div className="flex space-x-2">
                   <button onClick={() => handleSaveEdit(producto.id)} className="flex-1 bg-green-500 text-white py-2 rounded-lg font-semibold">Guardar</button>
@@ -1240,7 +1230,7 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
                     {producto.nombre}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <span>${producto.precio}</span>
                   <button onClick={() => handleEditClick(producto)} className="text-sm text-blue-600 hover:underline">Editar</button>
@@ -1268,7 +1258,7 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-xl font-bold mb-4 text-orange-500">Resumen del Pedido</h3>
-              
+
               {selectedPedido.tipo === 'externo' && selectedPedido.cliente && (
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2">Cliente:</h4>
@@ -1284,7 +1274,7 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
                   <p>Mesa {mesas.find(m => m.id === selectedPedido.mesaId)?.numero}</p>
                 </div>
               )}
-              
+
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Productos:</h4>
                 <ul className="space-y-2">
@@ -1308,7 +1298,7 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
                   </div>
                 )}
               </div>
-              
+
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
                 {selectedPedido.horaEntrega && <p>Hora: {selectedPedido.horaEntrega}</p>}
@@ -1316,21 +1306,21 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
                 {selectedPedido.metodoPago === 'efectivo' && selectedPedido.pagoCon && (
                   <p>Paga con: ${selectedPedido.pagoCon}</p>
                 )}
-                 {selectedPedido.metodoPago === 'efectivo' && selectedPedido.cambio && (
+                {selectedPedido.metodoPago === 'efectivo' && selectedPedido.cambio && (
                   <p>Cambio: ${selectedPedido.cambio}</p>
                 )}
                 {selectedPedido.observaciones && (
                   <p className="mt-2">Observaciones: {selectedPedido.observaciones}</p>
                 )}
               </div>
-              
+
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between text-xl font-bold">
                   <span>Total:</span>
                   <span>${selectedPedido.total}</span>
                 </div>
               </div>
-              
+
             </motion.div>
           </motion.div>
         )}
