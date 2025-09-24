@@ -95,7 +95,7 @@ function App() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <PedidoInterno productos={productos} mesas={mesas} setMesas={setMesas} onPedidoFinalizado={fetchData} API_URL={API_URL} />
+              <PedidoInterno productos={productos} mesas={mesas} setMesas={setMesas} onPedidoFinalizado={fetchData} API_URL={API_URL} pedidos={pedidos} />
             </motion.div>
           )}
 
@@ -717,21 +717,50 @@ const ProductoSelector = ({ producto, onAgregar }) => {
   );
 };
 
-const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL }) => {
+const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL, pedidos }) => {
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
   const [carrito, setCarrito] = useState([]);
   const [showResumen, setShowResumen] = useState(false);
 
+  // Función corregida para seleccionar mesa
   const seleccionarMesa = (mesa) => {
+    setMesaSeleccionada(mesa.id);
+    
+    // Si la mesa está disponible, cambiar su estado a ocupada
     if (mesa.estado === 'disponible') {
-      setMesaSeleccionada(mesa.id);
       setMesas(mesas.map(m =>
         m.id === mesa.id ? { ...m, estado: 'ocupada' } : m
       ));
+    }
+    
+    // Cargar pedido existente si la mesa ya tiene uno
+    cargarPedidoActivo(mesa.id);
+  };
+
+  // Función para cargar pedido activo de una mesa (filtrado en frontend)
+  const cargarPedidoActivo = (mesaId) => {
+    // Buscar en la lista de pedidos si hay alguno activo para esta mesa
+    const pedidoActivo = pedidos.find(pedido => 
+      pedido.tipo === 'interno' && 
+      pedido.mesaId === mesaId && 
+      pedido.estado !== 'entregado'
+    );
+    
+    if (pedidoActivo) {
+      // Cargar los items del pedido activo en el carrito
+      setCarrito(pedidoActivo.items || []);
     } else {
-      setMesaSeleccionada(mesa.id);
+      // Si no hay pedido activo, limpiar el carrito
+      setCarrito([]);
     }
   };
+
+  // Actualizar el carrito cuando cambia la mesa seleccionada o los pedidos
+  useEffect(() => {
+    if (mesaSeleccionada) {
+      cargarPedidoActivo(mesaSeleccionada);
+    }
+  }, [mesaSeleccionada, pedidos]);
 
   const agregarAlCarrito = (producto, cantidad, tipo, conVerdura) => {
     if (cantidad <= 0) return;
@@ -757,7 +786,6 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
     if (!mesaSeleccionada || carrito.length === 0) return;
 
     const nuevoPedidoData = {
-      id: Date.now(),
       tipo: 'interno',
       mesaId: mesaSeleccionada,
       items: carrito,
@@ -779,26 +807,50 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevoPedidoData),
       });
-      if (!response.ok) throw new Error('Error al registrar el pedido');
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al registrar el pedido');
+      }
 
       onPedidoFinalizado(); // Recarga todos los datos
       setCarrito([]);
-      setShowResumen(false); // Cierra el modal de resumen
+      setShowResumen(false);
+      
+      alert('Pedido registrado para la mesa');
     } catch (error) {
       console.error('Error al finalizar pedido:', error);
-      alert('Hubo un error al registrar el pedido para la mesa.');
+      alert('Hubo un error al registrar el pedido para la mesa: ' + error.message);
     }
-
-    alert('Pedido registrado para la mesa');
   };
 
-  const liberarMesa = () => {
+  const liberarMesa = async () => {
+    if (!mesaSeleccionada) return;
+
+    // Buscar si hay pedidos pendientes para esta mesa
+    const pedidosPendientes = pedidos.filter(pedido => 
+      pedido.tipo === 'interno' && 
+      pedido.mesaId === mesaSeleccionada && 
+      pedido.estado !== 'entregado'
+    );
+
+    if (pedidosPendientes.length > 0) {
+      const confirmar = window.confirm(
+        `Esta mesa tiene ${pedidosPendientes.length} pedido(s) pendiente(s). ¿Estás seguro de que quieres liberarla?`
+      );
+      if (!confirmar) return;
+    }
+
+    // Liberar la mesa
     setMesas(mesas.map(m =>
       m.id === mesaSeleccionada ? { ...m, estado: 'disponible', pedidoActual: null } : m
     ));
     setMesaSeleccionada(null);
     setCarrito([]);
   };
+
+  // Obtener la mesa actualmente seleccionada
+  const mesaActual = mesas.find(m => m.id === mesaSeleccionada);
 
   return (
     <div className="max-w-md mx-auto">
@@ -812,26 +864,39 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
             <div
               key={mesa.id}
               onClick={() => seleccionarMesa(mesa)}
-              className={`p-4 rounded-lg border-2 text-center cursor-pointer ${mesaSeleccionada === mesa.id
-                ? 'border-orange-500 bg-orange-50'
-                : mesa.estado === 'ocupada'
+              className={`p-4 rounded-lg border-2 text-center cursor-pointer transition-all ${
+                mesaSeleccionada === mesa.id
+                  ? 'border-orange-500 bg-orange-100 shadow-md'
+                  : mesa.estado === 'ocupada'
                   ? 'border-red-500 bg-red-50'
                   : 'border-green-500 bg-green-50'
-                }`}
+              }`}
             >
               <div className="text-lg font-bold">Mesa {mesa.numero}</div>
-              <div className="text-sm capitalize">
-                {mesa.estado === 'disponible' ? 'Disponible' : 'Ocupada'}
-              </div>
+              <div className="text-sm capitalize">{mesa.estado}</div>
+              {mesaSeleccionada === mesa.id && (
+                <div className="text-xs text-orange-600 mt-1">✓ Seleccionada</div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
-      {mesaSeleccionada && (
+      {mesaSeleccionada && mesaActual && (
         <>
           <div className="bg-white rounded-xl shadow-md p-4 mb-6">
-            <h3 className="font-semibold mb-3 text-gray-800">Productos para Mesa {mesas.find(m => m.id === mesaSeleccionada).numero}</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold text-gray-800">
+                Productos para Mesa {mesaActual.numero}
+              </h3>
+              <span className={`text-sm font-medium px-2 py-1 rounded ${
+                mesaActual.estado === 'ocupada' 
+                  ? 'bg-red-100 text-red-800' 
+                  : 'bg-green-100 text-green-800'
+              }`}>
+                {mesaActual.estado}
+              </span>
+            </div>
 
             <div className="space-y-4">
               {productos.filter(p => p.categoria === 'taco' || p.categoria === 'torta').map(producto => (
@@ -887,7 +952,9 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
                   className="bg-white rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <h3 className="text-xl font-bold mb-4 text-orange-500">Resumen de la Mesa</h3>
+                  <h3 className="text-xl font-bold mb-4 text-orange-500">
+                    Resumen - Mesa {mesaActual.numero}
+                  </h3>
                   <ul className="space-y-2 mb-4">
                     {carrito.map(item => (
                       <li key={item.id} className="flex justify-between">
