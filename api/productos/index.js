@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
 
     // POST - Crear nuevo producto
     else if (req.method === "POST") {
-      const { nombre, precio, categoria, tipos, disponible = true } = req.body;
+      const { nombre, precio, categoria, disponible = true } = req.body;
 
       // Validaciones básicas
       if (!nombre || !precio || !categoria) {
@@ -37,16 +37,9 @@ module.exports = async (req, res) => {
           .json({ error: "Nombre, precio y categoría son requeridos" });
       }
 
-      const tiposArray = tipos
-        ? tipos
-            .split(",")
-            .map((t) => t.trim())
-            .filter((t) => t)
-        : [];
-
       const query = `
-        INSERT INTO productos (nombre, precio, categoria, tipos, disponible) 
-        VALUES ($1, $2, $3, $4, $5) 
+        INSERT INTO productos (nombre, precio, categoria, disponible) 
+        VALUES ($1, $2, $3, $4) 
         RETURNING *
       `;
 
@@ -54,8 +47,7 @@ module.exports = async (req, res) => {
         nombre,
         parseFloat(precio),
         categoria,
-        tiposArray,
-        disponible,
+        disponible
       ];
       const { rows } = await pool.query(query, values);
 
