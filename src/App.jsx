@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from './logo.jpg'; // Asegúrate de que tu logo esté en la carpeta src
 
+import NotificationManager from './NotificationManager'; // Importamos el nuevo componente
 
 function App() {
   const [activeTab, setActiveTab] = useState('externo');
@@ -72,6 +73,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <NotificationManager pedidos={pedidos} />
 
       <main className="flex-1 pt-20 pb-24 px-4 overflow-auto">
         <AnimatePresence mode="wait">
