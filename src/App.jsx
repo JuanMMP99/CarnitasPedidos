@@ -298,6 +298,13 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
   };
 
   const confirmarPedido = async () => {
+    const fechaPedido = horaEntrega ? new Date(horaEntrega) : new Date();
+    // Validar que la fecha de entrega no sea en el pasado
+    if (horaEntrega && new Date(horaEntrega) < new Date()) {
+      alert('La fecha y hora de entrega no puede ser en el pasado');
+      return;
+    }
+
     const nuevoPedidoData = {
       id: Date.now(),
       tipo: 'externo',
@@ -311,7 +318,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
       cambio: calcularCambio(),
       observaciones,
       estado: 'pendiente',
-      fecha: new Date()
+      fecha: fechaPedido
     };
 
     try {
@@ -1083,7 +1090,10 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                     {pedido.tipo === 'externo' ? 'Pedido Externo' : `Mesa ${mesas.find(m => m.id === pedido.mesaId)?.numero}`}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {new Date(pedido.fecha).toLocaleString('es-MX')}
+                    {pedido.horaEntrega
+                      ? new Date(pedido.horaEntrega).toLocaleString('es-MX')
+                      : new Date(pedido.fecha).toLocaleString('es-MX')
+                    }
                   </p>
                 </div>
                 <span className={`text-xs font-medium px-2 py-1 rounded capitalize ${pedido.estado === 'entregado'
@@ -1280,7 +1290,9 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
 
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
-                {selectedPedido.horaEntrega && <p>Hora: {selectedPedido.horaEntrega}</p>}
+                {selectedPedido.horaEntrega && (
+                  <p>Hora de entrega: {new Date(selectedPedido.horaEntrega).toLocaleString('es-MX')}</p>
+                )}
                 {selectedPedido.metodoPago && <p>Pago: {selectedPedido.metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>}
                 {selectedPedido.metodoPago === 'efectivo' && selectedPedido.pagoCon && (
                   <p>Paga con: ${selectedPedido.pagoCon}</p>
