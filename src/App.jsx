@@ -147,27 +147,6 @@ const Header = ({ activeTab, setActiveTab }) => {
           <p className="text-sm text-gray-500">{formatDate(fecha)}</p>
         </div>
       </div>
-
-      <div className="flex space-x-2">
-        <button
-          className={`px-3 py-1 rounded-full text-sm font-medium ${activeTab === 'externo' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setActiveTab('externo')}
-        >
-          Externo
-        </button>
-        <button
-          className={`px-3 py-1 rounded-full text-sm font-medium ${activeTab === 'interno' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setActiveTab('interno')}
-        >
-          Interno
-        </button>
-        <button
-          className={`px-3 py-1 rounded-full text-sm font-medium ${activeTab === 'admin' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setActiveTab('admin')}
-        >
-          Admin
-        </button>
-      </div>
     </header>
   );
 };
