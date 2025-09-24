@@ -982,14 +982,10 @@ const handleSaveEdit = async (id) => {
 };
 
 const toggleDisponibilidad = async (id) => {
-  console.log('Toggle disponibilidad para ID:', id);
-  console.log('URL que se usará:', `${API_URL}/productos?id=${id}`);
   
   const producto = productos.find(p => p.id === id);
-  console.log('Producto encontrado:', producto);
   
   const updatedProduct = { ...producto, disponible: !producto.disponible };
-  console.log('Datos a enviar:', updatedProduct);
 
   try {
     await fetch(`${API_URL}/productos?id=${id}`, {
@@ -1040,20 +1036,31 @@ const toggleDisponibilidad = async (id) => {
     alert('¡Producto creado con éxito!');
   };
   
-  const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
-    e.stopPropagation(); // Evita que se abra el modal al cambiar el estado
-    try {
-      await fetch(`${API_URL}/pedidos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: nuevoEstado })
-      });
-      onDataChange(); // Recargar todos los datos para reflejar el cambio
-    } catch (error) {
-      console.error("Error al cambiar el estado del pedido:", error);
-      alert('Hubo un error al actualizar el estado del pedido.');
+ const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
+  e.stopPropagation();
+  console.log('Cambiando estado del pedido ID:', id, 'a:', nuevoEstado);
+  
+  try {
+    const response = await fetch(`${API_URL}/pedidos?id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
     }
-  };
+    
+    const result = await response.json();
+    console.log('Respuesta del servidor:', result);
+    
+    onDataChange(); // Recargar datos
+  } catch (error) {
+    console.error("Error al cambiar el estado del pedido:", error);
+    alert(`Error: ${error.message}`);
+  }
+};
   
   return (
     <div className="max-w-lg mx-auto">
