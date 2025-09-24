@@ -1037,19 +1037,41 @@ const toggleDisponibilidad = async (id) => {
   };
   
   const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
-    e.stopPropagation(); // Evita que se abra el modal al cambiar el estado
-    try {
-      await fetch(`${API_URL}/pedidos/${id}`, {
+  e.stopPropagation();
+  console.log('Intentando cambiar estado. ID:', id, 'Nuevo estado:', nuevoEstado);
+  
+  try {
+    // PRIMERO intenta con la URL que probablemente espera tu backend actual
+    let response = await fetch(`${API_URL}/pedidos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+    
+    // Si falla, intenta con query parameter
+    if (!response.ok) {
+      console.log('Primer intento falló, intentando con query parameter...');
+      response = await fetch(`${API_URL}/pedidos?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado: nuevoEstado })
       });
-      onDataChange(); // Recargar todos los datos para reflejar el cambio
-    } catch (error) {
-      console.error("Error al cambiar el estado del pedido:", error);
-      alert('Hubo un error al actualizar el estado del pedido.');
     }
-  };
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('Estado cambiado exitosamente:', result);
+    
+    onDataChange(); // Recargar datos
+    
+  } catch (error) {
+    console.error("Error al cambiar el estado del pedido:", error);
+    alert('Error al actualizar el estado. Revisa la consola para más detalles.');
+  }
+};
   
   return (
     <div className="max-w-lg mx-auto">
@@ -1113,15 +1135,23 @@ className={`px-3 py-1 text-sm rounded-full ${filtroPedidos === 'interno' ? 'bg-o
               
               <div className="flex space-x-2">
                 <select
-                  value={pedido.estado}
-                  onChange={(e) => cambiarEstadoPedido(e, pedido.id, e.target.value)}
-                  className="text-xs p-1 border rounded"
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="preparacion">En preparación</option>
-                  <option value="listo">Listo</option>
-                  <option value="entregado">Entregado</option>
-                </select>
+  value={pedido.estado}
+  onChange={(e) => {
+    console.log('🔧 Cambiando estado del pedido:', {
+      id: pedido.id,
+      estadoActual: pedido.estado,
+      nuevoEstado: e.target.value,
+      API_URL: API_URL
+    });
+    cambiarEstadoPedido(e, pedido.id, e.target.value);
+  }}
+  className="text-xs p-1 border rounded"
+>
+  <option value="pendiente">Pendiente</option>
+  <option value="preparacion">En preparación</option>
+  <option value="listo">Listo</option>
+  <option value="entregado">Entregado</option>
+</select>
               </div>
             </div>
           ))}
