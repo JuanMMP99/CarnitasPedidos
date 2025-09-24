@@ -1,7 +1,6 @@
 import './App.css';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import logo from './logo.jpg'; // Asegúrate de que tu logo esté en la carpeta src
 
 import NotificationManager from './NotificationManager'; // Importamos el nuevo componente
 
@@ -143,7 +142,7 @@ const Header = ({ activeTab, setActiveTab }) => {
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4 flex justify-between items-center">
       <div className="flex items-center">
-        <img src={logo} alt="Logo de Carnitas El Güero" className="w-10 h-10 mr-3" />
+        <img src="/logo.jpg" alt="Logo de Carnitas El Güero" className="w-10 h-10 mr-3" />
         <div>
           <h1 className="font-bold text-lg">Carnitas El Güero</h1>
           <p className="text-sm text-gray-500">{formatDate(fecha)}</p>
