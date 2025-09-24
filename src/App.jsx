@@ -959,42 +959,46 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
     setEditedProductData({ nombre: '', precio: '' });
   };
 
-  const handleSaveEdit = async (id) => {
-    const productoOriginal = productos.find(p => p.id === id);
-    const updatedProduct = { 
-      ...productoOriginal, 
-      nombre: editedProductData.nombre, 
-      precio: parseFloat(editedProductData.precio) 
-    };
-
-    try {
-      await fetch(`${API_URL}/productos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProduct)
-      });
-      onDataChange(); // Recargar datos
-      handleCancelEdit();
-    } catch (error) {
-      console.error("Error al guardar producto:", error);
-    }
+const handleSaveEdit = async (id) => {
+  const productoOriginal = productos.find(p => p.id === id);
+  const updatedProduct = { 
+    ...productoOriginal, 
+    nombre: editedProductData.nombre, 
+    precio: parseFloat(editedProductData.precio) 
   };
-  
-  const toggleDisponibilidad = async (id) => {
-    const producto = productos.find(p => p.id === id);
-    const updatedProduct = { ...producto, disponible: !producto.disponible };
 
-    try {
-      await fetch(`${API_URL}/productos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProduct)
-      });
-      onDataChange(); // Recargar datos
-    } catch (error) {
-      console.error("Error al cambiar disponibilidad:", error);
-    }
-  };
+  try {
+    // CAMBIO: Usar query parameter en lugar de path
+    await fetch(`${API_URL}/productos?id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedProduct)
+    });
+    onDataChange(); // Recargar datos
+    handleCancelEdit();
+  } catch (error) {
+    console.error("Error al guardar producto:", error);
+    alert('Error al guardar el producto. Revisa la consola para más detalles.');
+  }
+};
+
+const toggleDisponibilidad = async (id) => {
+  const producto = productos.find(p => p.id === id);
+  const updatedProduct = { ...producto, disponible: !producto.disponible };
+
+  try {
+    // CAMBIO: Usar query parameter en lugar de path
+    await fetch(`${API_URL}/productos?id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedProduct)
+    });
+    onDataChange(); // Recargar datos
+  } catch (error) {
+    console.error("Error al cambiar disponibilidad:", error);
+    alert('Error al cambiar la disponibilidad. Revisa la consola para más detalles.');
+  }
+};
 
   const handleNewProductChange = (e) => {
     const { name, value } = e.target;
