@@ -1,9 +1,6 @@
 // src/NotificationManager.jsx
 import { useEffect, useState, useRef } from 'react';
 
-// Sonido de alerta (puedes cambiarlo por cualquier archivo de audio)
-import notificationSound from './notification.mp3'; 
-
 // El tiempo en minutos para que la alerta se dispare antes de la hora de entrega
 const MINUTOS_ALERTA_PREVIA = 20;
 
@@ -72,7 +69,7 @@ function NotificationManager({ pedidos }) {
 
   return (
     // Elemento de audio para reproducir el sonido de notificación
-    <audio ref={audioRef} src={notificationSound} preload="auto"></audio>
+    <audio ref={audioRef} src="/notification.mp3" preload="auto"></audio>
   );
 }
 
