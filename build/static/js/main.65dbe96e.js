@@ -18222,31 +18222,14 @@
         d = (0, r.useCallback)(async () => {
           try {
             var e, t, n;
-            console.log("Fetching data from:", u);
             const [r, o, s] = await Promise.all([
               fetch("".concat(u, "/productos")),
               fetch("".concat(u, "/mesas")),
               fetch("".concat(u, "/pedidos")),
             ]);
-            console.log("Respuestas recibidas:", {
-              productos: r.status,
-              mesas: o.status,
-              pedidos: s.status,
-            });
             const c = r.ok ? await r.json() : { data: [] },
               d = o.ok ? await o.json() : { data: [] },
               f = s.ok ? await s.json() : { data: [] };
-            console.log("Datos procesados:", {
-              productos:
-                (null === (e = c.data) || void 0 === e ? void 0 : e.length) ||
-                0,
-              mesas:
-                (null === (t = d.data) || void 0 === t ? void 0 : t.length) ||
-                0,
-              pedidos:
-                (null === (n = f.data) || void 0 === n ? void 0 : n.length) ||
-                0,
-            }),
               l(c.data || []),
               a(d.data || []),
               i(f.data || []);

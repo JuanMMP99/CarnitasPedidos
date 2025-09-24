@@ -1016,7 +1016,6 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
 
   const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
     e.stopPropagation();
-    console.log('🔧 Cambiando estado del pedido:', { id, nuevoEstado });
 
     try {
       // Usar query parameter como espera el backend
@@ -1030,9 +1029,6 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
         const errorText = await response.text();
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
-
-      const result = await response.json();
-      console.log('✅ Estado cambiado exitosamente:', result);
 
       onDataChange(); // Recargar datos
 

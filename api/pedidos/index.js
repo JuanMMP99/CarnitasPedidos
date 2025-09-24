@@ -31,8 +31,6 @@ module.exports = async (req, res) => {
       const { id } = req.query;
       const { estado } = req.body;
 
-      console.log('Actualizando pedido:', id, 'Nuevo estado:', estado);
-
       if (!id) {
         return res.status(400).json({ error: 'ID del pedido es requerido' });
       }
