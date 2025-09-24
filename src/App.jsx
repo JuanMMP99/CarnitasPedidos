@@ -722,32 +722,17 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
   const [carrito, setCarrito] = useState([]);
   const [showResumen, setShowResumen] = useState(false);
 
-  const updateMesaState = async (mesaId, nuevoEstado, pedidoActual = null) => {
-    try {
-      const response = await fetch(`${API_URL}/mesas?id=${mesaId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: nuevoEstado, pedidoActual }),
-      });
-      if (!response.ok) throw new Error('Error al actualizar el estado de la mesa');
-      const updatedMesa = await response.json();
-      // Actualizar el estado local de las mesas
-      setMesas(mesas.map(m => m.id === mesaId ? updatedMesa.data : m));
-    } catch (error) {
-      console.error("Error actualizando mesa:", error);
-      alert("No se pudo actualizar el estado de la mesa.");
-    }
-  };
-
   const seleccionarMesa = (mesa) => {
     if (mesa.estado === 'disponible') {
       setMesaSeleccionada(mesa.id);
-      // Ocupar la mesa en la DB
-      updateMesaState(mesa.id, 'ocupada');
+      setMesas(mesas.map(m =>
+        m.id === mesa.id ? { ...m, estado: 'ocupada' } : m
+      ));
     } else {
       setMesaSeleccionada(mesa.id);
     }
   };
+
   const agregarAlCarrito = (producto, cantidad, tipo, conVerdura) => {
     if (cantidad <= 0) return;
 
@@ -763,12 +748,14 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
 
     setCarrito([...carrito, nuevoItem]);
   };
+
   const calcularTotal = () => {
     return carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
   };
 
   const finalizarPedido = async () => {
     if (!mesaSeleccionada || carrito.length === 0) return;
+
     const nuevoPedidoData = {
       id: Date.now(),
       tipo: 'interno',
@@ -796,16 +783,19 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
 
       onPedidoFinalizado(); // Recarga todos los datos
       setCarrito([]);
-      setShowResumen(false);
+      setShowResumen(false); // Cierra el modal de resumen
     } catch (error) {
       console.error('Error al finalizar pedido:', error);
       alert('Hubo un error al registrar el pedido para la mesa.');
     }
+
     alert('Pedido registrado para la mesa');
   };
 
   const liberarMesa = () => {
-    updateMesaState(mesaSeleccionada, 'disponible', null);
+    setMesas(mesas.map(m =>
+      m.id === mesaSeleccionada ? { ...m, estado: 'disponible', pedidoActual: null } : m
+    ));
     setMesaSeleccionada(null);
     setCarrito([]);
   };
@@ -864,24 +854,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
             </div>
           </div>
 
-          {carrito.length > 0 && (
-            <div className="flex space-x-3 mt-4">
-              <button
-                onClick={() => setShowResumen(true)}
-                className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-semibold"
-              >
-                Ver Resumen y Finalizar
-              </button>
-              <button
-                onClick={liberarMesa}
-                className="flex-1 bg-gray-300 text-gray-800 py-3 rounded-lg font-semibold"
-              >
-                Liberar Mesa
-              </button>
-            </div>
-          )}
-
-          {/* {carrito.length > 0 && !showResumen && (
+          {carrito.length > 0 && !showResumen && (
             <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
               <div className="flex justify-between items-center max-w-md mx-auto">
                 <div>
@@ -896,7 +869,7 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
                 </button>
               </div>
             </div>
-          )} */}
+          )}
 
           <AnimatePresence>
             {showResumen && (
@@ -944,6 +917,14 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
             )}
           </AnimatePresence>
 
+          <div className="flex space-x-3 mt-4">
+            <button
+              onClick={liberarMesa}
+              className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold"
+            >
+              Liberar Mesa
+            </button>
+          </div>
         </>
       )}
     </div>
