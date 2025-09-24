@@ -1038,37 +1038,28 @@ const toggleDisponibilidad = async (id) => {
   
   const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
   e.stopPropagation();
-  console.log('Intentando cambiar estado. ID:', id, 'Nuevo estado:', nuevoEstado);
+  console.log('🔧 Cambiando estado del pedido:', { id, nuevoEstado });
   
   try {
-    // PRIMERO intenta con la URL que probablemente espera tu backend actual
-    let response = await fetch(`${API_URL}/pedidos/${id}`, {
+    // Usar query parameter como espera el backend
+    const response = await fetch(`${API_URL}/pedidos?id=${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado: nuevoEstado })
     });
     
-    // Si falla, intenta con query parameter
     if (!response.ok) {
-      console.log('Primer intento falló, intentando con query parameter...');
-      response = await fetch(`${API_URL}/pedidos?id=${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: nuevoEstado })
-      });
-    }
-    
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
     }
     
     const result = await response.json();
-    console.log('Estado cambiado exitosamente:', result);
+    console.log('✅ Estado cambiado exitosamente:', result);
     
     onDataChange(); // Recargar datos
     
   } catch (error) {
-    console.error("Error al cambiar el estado del pedido:", error);
+    console.error("❌ Error al cambiar el estado del pedido:", error);
     alert('Error al actualizar el estado. Revisa la consola para más detalles.');
   }
 };
