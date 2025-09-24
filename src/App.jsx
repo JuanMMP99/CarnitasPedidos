@@ -1,8 +1,8 @@
 import './App.css';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from './logo.jpg'; // Asegúrate de que tu logo esté en la carpeta src
 
-import NotificationManager from './NotificationManager'; // Importamos el nuevo componente
 
 function App() {
   const [activeTab, setActiveTab] = useState('externo');
@@ -72,7 +72,6 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-      <NotificationManager pedidos={pedidos} />
 
       <main className="flex-1 pt-20 pb-24 px-4 overflow-auto">
         <AnimatePresence mode="wait">
@@ -142,7 +141,7 @@ const Header = ({ activeTab, setActiveTab }) => {
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4 flex justify-between items-center">
       <div className="flex items-center">
-        <img src="/logo.jpg" alt="Logo de Carnitas El Güero" className="w-10 h-10 mr-3" />
+        <img src={logo} alt="Logo de Carnitas El Güero" className="w-10 h-10 mr-3" />
         <div>
           <h1 className="font-bold text-lg">Carnitas El Güero</h1>
           <p className="text-sm text-gray-500">{formatDate(fecha)}</p>
@@ -1017,6 +1016,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
 
   const cambiarEstadoPedido = async (e, id, nuevoEstado) => {
     e.stopPropagation();
+    console.log('🔧 Cambiando estado del pedido:', { id, nuevoEstado });
 
     try {
       // Usar query parameter como espera el backend
@@ -1030,6 +1030,9 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
         const errorText = await response.text();
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
+
+      const result = await response.json();
+      console.log('✅ Estado cambiado exitosamente:', result);
 
       onDataChange(); // Recargar datos
 
