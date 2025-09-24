@@ -1,93 +1,106 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL + '?sslmode=require',
-  ssl: { rejectUnauthorized: false }
+  connectionString: process.env.POSTGRES_URL + "?sslmode=require",
+  ssl: { rejectUnauthorized: false },
 });
 
 module.exports = async (req, res) => {
   // Configurar CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Manejar preflight requests
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
   try {
-    // GET - Obtener todos los pedidos
-    if (req.method === 'GET') {
-      const { rows } = await pool.query('SELECT * FROM pedidos ORDER BY fecha DESC');
+    // GET - Obtener todos los productos
+    if (req.method === "GET") {
+      const { rows } = await pool.query("SELECT * FROM productos ORDER BY id");
       res.json({ message: "success", data: rows });
     }
-    
-    // POST - Crear nuevo pedido
-    else if (req.method === 'POST') {
-      const { tipo, cliente, items, total, mesaId, estado, horaEntrega, metodoPago, pagoCon, cambio, observaciones, costoEnvio } = req.body;
-      
+
+    // POST - Crear nuevo producto
+    else if (req.method === "POST") {
+      const { nombre, precio, categoria, tipos, disponible = true } = req.body;
+
+      // Validaciones básicas
+      if (!nombre || !precio || !categoria) {
+        return res
+          .status(400)
+          .json({ error: "Nombre, precio y categoría son requeridos" });
+      }
+
+      const tiposArray = tipos
+        ? tipos
+            .split(",")
+            .map((t) => t.trim())
+            .filter((t) => t)
+        : [];
+
       const query = `
-        INSERT INTO pedidos (tipo, cliente, items, total, "mesaId", estado, "horaEntrega", "metodoPago", "pagoCon", cambio, observaciones, "costoEnvio", fecha) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+        INSERT INTO productos (nombre, precio, categoria, tipos, disponible) 
+        VALUES ($1, $2, $3, $4, $5) 
         RETURNING *
       `;
-      
+
       const values = [
-        tipo, 
-        cliente, 
-        items, 
-        total, 
-        mesaId, 
-        estado || 'pendiente', 
-        horaEntrega, 
-        metodoPago, 
-        pagoCon, 
-        cambio, 
-        observaciones, 
-        costoEnvio, 
-        new Date()
+        nombre,
+        parseFloat(precio),
+        categoria,
+        tiposArray,
+        disponible,
       ];
-      
       const { rows } = await pool.query(query, values);
-      res.status(201).json({ message: "Pedido creado exitosamente", data: rows[0] });
+
+      res
+        .status(201)
+        .json({ message: "Producto creado exitosamente", data: rows[0] });
     }
-    
-    // PUT - Actualizar estado del pedido
-    else if (req.method === 'PUT') {
-      const { id } = req.query;
-      const { estado } = req.body;
-      
-      console.log('Actualizando pedido ID:', id, 'Nuevo estado:', estado);
-      
-      if (!id) {
-        return res.status(400).json({ error: 'ID del pedido es requerido' });
+
+// PUT - Actualizar producto existente
+else if (req.method === 'PUT') {
+  const { id } = req.query; // ← Esto es importante, recibe el ID del query parameter
+  const { nombre, precio, disponible } = req.body;
+  
+  if (!id) {
+    return res.status(400).json({ error: 'ID del producto es requerido' });
+  }
+
+      // Verificar si el producto existe
+      const productCheck = await pool.query(
+        "SELECT * FROM productos WHERE id = $1",
+        [id]
+      );
+      if (productCheck.rows.length === 0) {
+        return res.status(404).json({ error: "Producto no encontrado" });
       }
-      
-      // Verificar si el pedido existe
-      const pedidoCheck = await pool.query('SELECT * FROM pedidos WHERE id = $1', [id]);
-      if (pedidoCheck.rows.length === 0) {
-        return res.status(404).json({ error: 'Pedido no encontrado' });
-      }
-      
+
       const query = `
-        UPDATE pedidos 
-        SET estado = $1 
-        WHERE id = $2 
+        UPDATE productos 
+        SET nombre = $1, precio = $2, disponible = $3 
+        WHERE id = $4 
         RETURNING *
       `;
-      
-      const values = [estado, id];
+
+      const values = [nombre, parseFloat(precio), disponible, id];
       const { rows } = await pool.query(query, values);
-      
-      res.json({ message: "Estado del pedido actualizado exitosamente", data: rows[0] });
+
+      res.json({ message: "Producto actualizado exitosamente", data: rows[0] });
     }
-    
+
+    // Método no soportado
     else {
-      res.status(405).json({ error: 'Método no permitido' });
+      res.status(405).json({ error: "Método no permitido" });
     }
-    
   } catch (err) {
-    console.error('Error en API de pedidos:', err);
+    console.error("Error en API de productos:", err);
     res.status(500).json({ error: err.message });
   }
 };
