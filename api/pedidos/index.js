@@ -15,20 +15,32 @@ module.exports = async (req, res) => {
   try {
     if (req.method === "GET") {
       const { rows } = await pool.query(`
-    SELECT *, 
-           fecha as "fecha",
-           hora_entrega as "horaEntrega",
-           metodo_pago as "metodoPago", 
-           pago_con as "pagoCon",
-           cambio as "cambio",
-           observaciones as "observaciones",
-           costo_envio as "costoEnvio"
-    FROM pedidos 
-    ORDER BY fecha DESC
+    SELECT * FROM pedidos ORDER BY fecha DESC
   `);
 
       console.log("📋 Pedidos obtenidos:", rows.length);
       res.json({ message: "success", data: rows });
+    } else if (req.method === "POST") {
+      const data = req.body;
+
+      console.log("📦 Datos recibidos en POST:", JSON.stringify(data, null, 2));
+
+      // Solo usar columnas básicas por ahora
+      const sql = `INSERT INTO pedidos 
+               (tipo, cliente, items, total, estado, fecha) 
+               VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
+
+      const result = await pool.query(sql, [
+        data.tipo,
+        data.cliente ? JSON.stringify(data.cliente) : null,
+        JSON.stringify(data.items),
+        data.total,
+        data.estado || "pendiente",
+        data.fecha ? new Date(data.fecha) : new Date(),
+      ]);
+
+      console.log("✅ Pedido guardado con ID:", result.rows[0].id);
+      res.json({ message: "success", id: result.rows[0].id });
     } else if (req.method === "POST") {
       const data = req.body;
 

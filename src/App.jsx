@@ -590,7 +590,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
 
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
-                <p>Hora: {horaEntrega || 'Lo antes posible'}</p>
+                <p>Hora: {horaEntrega ? new Date(horaEntrega).toLocaleString('es-MX') : 'Lo antes posible'}</p>
                 <p>Pago: {metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>
                 {metodoPago === 'efectivo' && pagoCon && (
                   <p>Cambio: ${calcularCambio()}</p>
