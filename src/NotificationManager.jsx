@@ -22,6 +22,14 @@ function NotificationManager({ pedidos }) {
     const checkPedidos = () => {
       if (permission !== 'granted') return;
 
+      // Limpieza: Sincroniza la lista de notificados con los pedidos actuales
+      const currentPedidoIds = new Set(pedidos.map(p => p.id));
+      notifiedPedidosRef.current.forEach(notifiedId => {
+        if (!currentPedidoIds.has(notifiedId)) {
+          notifiedPedidosRef.current.delete(notifiedId);
+        }
+      });
+
       const ahora = new Date();
       const umbral = new Date(ahora.getTime() + MINUTOS_ALERTA_PREVIA * 60000);
 

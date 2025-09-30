@@ -2,6 +2,7 @@ import './App.css';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from './logo.jpg'; // Asegúrate de que tu logo esté en la carpeta src
+import NotificationManager from './NotificationManager';
 
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <NotificationManager pedidos={pedidos} />
 
       <main className="flex-1 pt-20 pb-24 px-4 overflow-auto">
         <AnimatePresence mode="wait">
@@ -1330,12 +1332,12 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
 
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
-                {selectedPedido.horaEntrega && (
-                  <p>Hora de entrega: {new Date(selectedPedido.horaEntrega).toLocaleString('es-MX')}</p>
+                {selectedPedido.hora_entrega && (
+                  <p>Hora de entrega: {new Date(selectedPedido.hora_entrega).toLocaleString('es-MX')}</p>
                 )}
-                {selectedPedido.metodoPago && <p>Pago: {selectedPedido.metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>}
-                {selectedPedido.metodoPago === 'efectivo' && selectedPedido.pagoCon && (
-                  <p>Paga con: ${selectedPedido.pagoCon}</p>
+                {selectedPedido.metodo_pago && <p>Pago: {selectedPedido.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>}
+                {selectedPedido.metodo_pago === 'efectivo' && selectedPedido.pago_con && (
+                  <p>Paga con: ${selectedPedido.pago_con}</p>
                 )}
                 {selectedPedido.metodoPago === 'efectivo' && selectedPedido.cambio && (
                   <p>Cambio: ${selectedPedido.cambio}</p>
