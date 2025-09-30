@@ -19,11 +19,33 @@ module.exports = async (req, res) => {
     } 
     else if (req.method === 'POST') {
       const data = req.body;
-      const sql = `INSERT INTO pedidos (tipo, cliente, items, total, estado, fecha) 
-                   VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
+      // Campos que vienen del frontend
+      const {
+        tipo,
+        cliente,
+        items,
+        total,
+        costoEnvio,
+        horaEntrega,
+        metodoPago,
+        pagoCon,
+        cambio,
+        observaciones,
+        estado,
+        fecha, // Este es el que contiene la hora de entrega si se especificó
+        mesaId
+      } = data;
+
+      const sql = `
+        INSERT INTO pedidos (tipo, cliente, items, total, costo_envio, hora_entrega, metodo_pago, pago_con, cambio, observaciones, estado, fecha, mesa_id) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+        RETURNING id
+      `;
+
       const result = await pool.query(sql, [
-        data.tipo, data.cliente, JSON.stringify(data.items), data.total, 'pendiente', new Date()
+        tipo, cliente, JSON.stringify(items), total, costoEnvio, horaEntrega, metodoPago, pagoCon, cambio, observaciones, estado || 'pendiente', fecha, mesaId
       ]);
+
       res.json({ message: "success", id: result.rows[0].id });
     }
     else if (req.method === 'PUT') {
