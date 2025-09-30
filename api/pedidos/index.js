@@ -1,8 +1,10 @@
 const { Pool } = require('pg');
 
+// La URL de Vercel ya incluye los parámetros SSL necesarios.
+// El paquete 'pg' los interpreta automáticamente.
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL + '?sslmode=require',
-  ssl: { rejectUnauthorized: false }
+  connectionString: process.env.POSTGRES_URL,
+  ssl: { rejectUnauthorized: false } // Esencial para conexiones a Vercel Postgres
 });
 
 module.exports = async (req, res) => {
@@ -71,6 +73,6 @@ module.exports = async (req, res) => {
     }
   } catch (err) {
     console.error('Error en API pedidos:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Error interno del servidor." });
   }
 };
