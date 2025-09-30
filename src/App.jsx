@@ -708,12 +708,30 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
   const [carrito, setCarrito] = useState([]);
   const [showResumen, setShowResumen] = useState(false);
 
-  const seleccionarMesa = (mesa) => {
+  const seleccionarMesa = async (mesa) => {
     if (mesa.estado === 'disponible') {
-      setMesaSeleccionada(mesa.id);
-      setMesas(mesas.map(m =>
-        m.id === mesa.id ? { ...m, estado: 'ocupada' } : m
-      ));
+      try {
+        // Actualizar la mesa en el backend
+        const response = await fetch(`${API_URL}/mesas?id=${mesa.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            estado: 'ocupada',
+            pedidoActual: 'activo'
+          })
+        });
+
+        if (!response.ok) throw new Error('Error al actualizar mesa');
+
+        // Actualizar el estado local
+        setMesaSeleccionada(mesa.id);
+        setMesas(mesas.map(m =>
+          m.id === mesa.id ? { ...m, estado: 'ocupada', pedidoActual: 'activo' } : m
+        ));
+      } catch (error) {
+        console.error('Error al seleccionar mesa:', error);
+        alert('Error al seleccionar la mesa');
+      }
     } else {
       setMesaSeleccionada(mesa.id);
     }
@@ -778,12 +796,30 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
     alert('Pedido registrado para la mesa');
   };
 
-  const liberarMesa = () => {
-    setMesas(mesas.map(m =>
-      m.id === mesaSeleccionada ? { ...m, estado: 'disponible', pedidoActual: null } : m
-    ));
-    setMesaSeleccionada(null);
-    setCarrito([]);
+  const liberarMesa = async () => {
+    try {
+      // Actualizar la mesa en el backend
+      const response = await fetch(`${API_URL}/mesas?id=${mesaSeleccionada}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          estado: 'disponible',
+          pedidoActual: null
+        })
+      });
+
+      if (!response.ok) throw new Error('Error al liberar mesa');
+
+      // Actualizar el estado local
+      setMesas(mesas.map(m =>
+        m.id === mesaSeleccionada ? { ...m, estado: 'disponible', pedidoActual: null } : m
+      ));
+      setMesaSeleccionada(null);
+      setCarrito([]);
+    } catch (error) {
+      console.error('Error al liberar mesa:', error);
+      alert('Error al liberar la mesa');
+    }
   };
 
   return (
