@@ -1262,11 +1262,18 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                 <div className="flex items-center">
                   <button
                     onClick={() => toggleDisponibilidad(producto.id)}
-                    className={`w-5 h-5 rounded-full mr-3 flex-shrink-0 ${producto.disponible ? 'bg-green-500' : 'bg-red-500'}`}
+                    className={`flex items-center space-x-2 cursor-pointer select-none ${producto.disponible ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+                      } rounded-full w-12 h-6 relative transition-colors duration-200`}
                     aria-label={`Marcar ${producto.nombre} como ${producto.disponible ? 'no disponible' : 'disponible'}`}
-                  ></button>
-                  <span className={!producto.disponible ? 'line-through text-gray-400' : ''}>
-                    {producto.nombre}
+                  >
+                    <span
+                      className={`block w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-200 ${producto.disponible ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                    />
+                    <span className="sr-only">{producto.disponible ? 'Disponible' : 'No disponible'}</span>
+                  </button>
+                  <span className={`font-medium ${producto.disponible ? 'text-green-700' : 'text-red-700'}`}>
+                    {producto.disponible ? 'Habilitado' : 'Deshabilitado'}
                   </span>
                 </div>
 
