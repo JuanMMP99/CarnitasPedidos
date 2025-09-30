@@ -15,20 +15,20 @@ module.exports = async (req, res) => {
   try {
     if (req.method === "GET") {
       const { rows } = await pool.query(`
-    SELECT * FROM pedidos ORDER BY fecha DESC
-  `);
-
+        SELECT * FROM pedidos ORDER BY fecha DESC
+      `);
       console.log("📋 Pedidos obtenidos:", rows.length);
       res.json({ message: "success", data: rows });
-    } else if (req.method === "POST") {
+    } 
+    
+    else if (req.method === "POST") {
       const data = req.body;
-
       console.log("📦 Datos recibidos en POST:", JSON.stringify(data, null, 2));
 
-      // Solo usar columnas básicas por ahora
+      // SOLUCIÓN: Usa esta consulta que incluye mesaid
       const sql = `INSERT INTO pedidos 
-               (tipo, cliente, items, total, estado, fecha) 
-               VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
+                   (tipo, cliente, items, total, estado, fecha, mesaid, hora_entrega, metodo_pago, pago_con, cambio, observaciones, costo_envio) 
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`;
 
       const result = await pool.query(sql, [
         data.tipo,
@@ -37,27 +37,8 @@ module.exports = async (req, res) => {
         data.total,
         data.estado || "pendiente",
         data.fecha ? new Date(data.fecha) : new Date(),
-      ]);
-
-      console.log("✅ Pedido guardado con ID:", result.rows[0].id);
-      res.json({ message: "success", id: result.rows[0].id });
-    } else if (req.method === "POST") {
-      const data = req.body;
-
-      console.log("📦 Datos recibidos en POST:", JSON.stringify(data, null, 2));
-
-      const sql = `INSERT INTO pedidos 
-               (tipo, cliente, items, total, estado, fecha, hora_entrega, metodo_pago, pago_con, cambio, observaciones, costo_envio) 
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`;
-
-      const result = await pool.query(sql, [
-        data.tipo,
-        data.cliente ? JSON.stringify(data.cliente) : null,
-        JSON.stringify(data.items),
-        data.total,
-        data.estado || "pendiente",
-        data.fecha ? new Date(data.fecha) : new Date(),
-        data.horaEntrega ? new Date(data.horaEntrega) : null, // ← Aquí está el problema principal
+        data.mesaId || null,  // ← ¡AGREGA ESTA LÍNEA!
+        data.horaEntrega ? new Date(data.horaEntrega) : null,
         data.metodoPago || null,
         data.pagoCon || null,
         data.cambio || null,
@@ -67,8 +48,9 @@ module.exports = async (req, res) => {
 
       console.log("✅ Pedido guardado con ID:", result.rows[0].id);
       res.json({ message: "success", id: result.rows[0].id });
-    } else if (req.method === "PUT") {
-      // Obtener el ID del query parameter (/?id=5)
+    } 
+    
+    else if (req.method === "PUT") {
       const { id } = req.query;
       const { estado } = req.body;
 
@@ -78,7 +60,6 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: "ID del pedido es requerido" });
       }
 
-      // Actualizar solo el estado del pedido
       const sql = `UPDATE pedidos SET estado = $1 WHERE id = $2 RETURNING *`;
       const result = await pool.query(sql, [estado, id]);
 

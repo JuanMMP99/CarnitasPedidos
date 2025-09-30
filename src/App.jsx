@@ -1299,7 +1299,8 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
               {selectedPedido.tipo === 'interno' && (
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2">Mesa:</h4>
-                  <p>Mesa {mesas.find(m => m.id === selectedPedido.mesaId)?.numero}</p>
+                  {/* Cambia mesaId por mesaid */}
+                  <p>Mesa {mesas.find(m => m.id === selectedPedido.mesaid)?.numero}</p>
                 </div>
               )}
 
