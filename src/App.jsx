@@ -763,12 +763,11 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
     const nuevoPedidoData = {
       id: Date.now(),
       tipo: 'interno',
-      mesaId: mesaSeleccionada,
+      mesaId: mesaSeleccionada, // ← Asegúrate que esto sea el ID correcto
       items: carrito,
       total: calcularTotal(),
       estado: 'pendiente',
       fecha: new Date(),
-      // Campos de pedido externo en null
       cliente: null,
       horaEntrega: null,
       metodoPago: null,
@@ -776,6 +775,8 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
       cambio: null,
       observaciones: null,
     };
+
+    console.log('📦 Enviando pedido interno:', nuevoPedidoData); // ← Agrega este log
 
     try {
       const response = await fetch(`${API_URL}/pedidos`, {
@@ -954,6 +955,8 @@ const PedidoInterno = ({ productos, mesas, setMesas, onPedidoFinalizado, API_URL
 };
 
 const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API_URL }) => {
+  console.log('📊 Pedidos:', pedidos);
+  console.log('🍽️ Mesas:', mesas);
   const [filtroPedidos, setFiltroPedidos] = useState('todos');
   const [editingProductId, setEditingProductId] = useState(null);
   const [selectedPedido, setSelectedPedido] = useState(null);
@@ -1123,7 +1126,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <p className="font-semibold">
-                    {pedido.tipo === 'externo' ? 'Pedido Externo' : `Mesa ${mesas.find(m => m.id === pedido.mesaId)?.numero}`}
+                    {pedido.tipo === 'externo' ? 'Pedido Externo' : `Mesa ${mesas.find(m => m.id === pedido.mesaid)?.numero || 'N/A'}`}
                   </p>
                   <p className="text-sm text-gray-600">
                     {pedido.horaEntrega
