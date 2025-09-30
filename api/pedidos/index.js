@@ -37,8 +37,8 @@ module.exports = async (req, res) => {
         data.total,
         data.estado || "pendiente",
         data.fecha ? new Date(data.fecha) : new Date(),
-        data.mesaId || null,
-        data.horaEntrega || null, // Guardar como texto
+        data.mesaId || null, // No cambia
+        data.horaEntrega ? data.horaEntrega.replace('T', ' ') : null, // Convertir a formato SQL timestamp
         data.metodoPago || null,
         data.pagoCon || null,
         data.cambio || null,
