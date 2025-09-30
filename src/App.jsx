@@ -1272,9 +1272,10 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                     />
                     <span className="sr-only">{producto.disponible ? 'Disponible' : 'No disponible'}</span>
                   </button>
-                  <span className={`font-medium ${producto.disponible ? 'text-green-500' : 'text-red-500'}`}>
-                    {producto.disponible ? ' Disponible' : ' No disponible'}
+                  <span className={`font-medium ml-3 ${producto.disponible ? 'text-green-500' : 'text-red-500'}`}>
+                    {producto.disponible ? 'Habilitado' : 'Deshabilitado'}
                   </span>
+
                 </div>
 
                 <div className="flex items-center space-x-3">
