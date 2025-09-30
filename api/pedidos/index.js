@@ -13,13 +13,29 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
-    if (req.method === "GET") {
-      const { rows } = await pool.query(`
-        SELECT * FROM pedidos ORDER BY fecha DESC
-      `);
-      console.log("📋 Pedidos obtenidos:", rows.length);
-      res.json({ message: "success", data: rows });
-    } 
+    // En el GET de pedidos, ajusta la hora_entrega
+if (req.method === "GET") {
+  const { rows } = await pool.query(`
+    SELECT * FROM pedidos ORDER BY fecha DESC
+  `);
+  
+  // Ajustar las horas para el frontend
+  const pedidosAjustados = rows.map(pedido => {
+    if (pedido.hora_entrega) {
+      // Crear nueva fecha ajustada (+6 horas)
+      const fechaAjustada = new Date(pedido.hora_entrega);
+      fechaAjustada.setHours(fechaAjustada.getHours() + 6);
+      return {
+        ...pedido,
+        hora_entrega: fechaAjustada.toISOString()
+      };
+    }
+    return pedido;
+  });
+  
+  console.log("📋 Pedidos obtenidos:", pedidosAjustados.length);
+  res.json({ message: "success", data: pedidosAjustados });
+}
     
     else if (req.method === "POST") {
       const data = req.body;
