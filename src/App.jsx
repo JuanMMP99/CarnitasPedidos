@@ -587,7 +587,11 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
                 <h4 className="font-semibold mb-2">Detalles:</h4>
                 <p>
                   Hora de entrega: {horaEntrega
-                    ? new Date(horaEntrega).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                    ? new Date(horaEntrega + 'Z').toLocaleString('es-MX', {
+                      timeZone: 'America/Mexico_City',
+                      dateStyle: 'short',
+                      timeStyle: 'short'
+                    })
                     : 'Lo antes posible'}
                 </p>
                 <p>Pago: {metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>
@@ -1130,10 +1134,15 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                   <p className="text-sm text-gray-600">
                     {pedido.hora_entrega ?
                       new Date(pedido.hora_entrega).toLocaleString('es-MX', {
+                        timeZone: 'America/Mexico_City',
                         dateStyle: 'short',
                         timeStyle: 'short'
                       }) :
-                      new Date(pedido.fecha).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                      new Date(pedido.fecha).toLocaleString('es-MX', {
+                        timeZone: 'America/Mexico_City',
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      })
                     }
                   </p>
                 </div>
@@ -1334,7 +1343,9 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                 <h4 className="font-semibold mb-2">Detalles:</h4>
                 {selectedPedido.hora_entrega ? (
                   <p>Hora de entrega: {new Date(selectedPedido.hora_entrega).toLocaleString('es-MX', {
-                    dateStyle: 'short', timeStyle: 'short'
+                    timeZone: 'America/Mexico_City',
+                    dateStyle: 'short',
+                    timeStyle: 'short'
                   })}</p>
                 ) : (
                   <p>Fecha del pedido: {new Date(selectedPedido.fecha).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}</p>
