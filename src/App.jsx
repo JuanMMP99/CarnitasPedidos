@@ -1128,9 +1128,11 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                     {pedido.tipo === 'externo' ? 'Pedido Externo' : `Mesa ${mesas.find(m => m.id === pedido.mesaid)?.numero || 'N/A'}`}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {pedido.hora_entrega
-                      ? new Date(pedido.hora_entrega).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
-                      : new Date(pedido.fecha).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                    {pedido.hora_entrega ? (
+                      new Date(pedido.hora_entrega).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                    ) : (
+                      new Date(pedido.fecha).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                    )
                     }
                   </p>
                 </div>
@@ -1319,10 +1321,10 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                     </li>
                   ))}
                 </ul>
-                {selectedPedido.costoEnvio > 0 && (
+                {selectedPedido.costo_envio > 0 && (
                   <div className="flex justify-between border-t pt-2 mt-2">
                     <span className="font-medium">Costo de envío</span>
-                    <span>${parseFloat(selectedPedido.costoEnvio)}</span>
+                    <span>${parseFloat(selectedPedido.costo_envio)}</span>
                   </div>
                 )}
               </div>
