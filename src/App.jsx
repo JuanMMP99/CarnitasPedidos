@@ -1129,12 +1129,11 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                   </p>
                   <p className="text-sm text-gray-600">
                     {pedido.hora_entrega ?
-                      new Date(pedido.hora_entrega.replace(' ', 'T')).toLocaleString('es-MX', {
+                      new Date(pedido.hora_entrega).toLocaleString('es-MX', {
                         dateStyle: 'short',
                         timeStyle: 'short'
-                      }) : (
+                      }) :
                       new Date(pedido.fecha).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
-                    )
                     }
                   </p>
                 </div>
@@ -1334,7 +1333,7 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
                 {selectedPedido.hora_entrega ? (
-                  <p>Hora de entrega: {new Date(selectedPedido.hora_entrega.replace(' ', 'T')).toLocaleString('es-MX', {
+                  <p>Hora de entrega: {new Date(selectedPedido.hora_entrega).toLocaleString('es-MX', {
                     dateStyle: 'short', timeStyle: 'short'
                   })}</p>
                 ) : (

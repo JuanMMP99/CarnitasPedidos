@@ -37,8 +37,8 @@ module.exports = async (req, res) => {
         data.total,
         data.estado || "pendiente",
         data.fecha ? new Date(data.fecha) : new Date(),
-        data.mesaId || null, // No cambia
-        data.horaEntrega ? data.horaEntrega.replace('T', ' ') : null, // Convertir a formato SQL timestamp
+        data.mesaId || null,
+        data.horaEntrega ? new Date(data.horaEntrega).toISOString() : null, // Guardar en formato ISO UTC
         data.metodoPago || null,
         data.pagoCon || null,
         data.cambio || null,
