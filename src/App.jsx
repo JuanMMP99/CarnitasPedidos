@@ -300,13 +300,6 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
   };
 
   const confirmarPedido = async () => {
-    const fechaPedido = horaEntrega ? new Date(horaEntrega) : new Date();
-    // Validar que la fecha de entrega no sea en el pasado
-    if (horaEntrega && new Date(horaEntrega) < new Date()) {
-      alert('La fecha y hora de entrega no puede ser en el pasado');
-      return;
-    }
-
     const nuevoPedidoData = {
       id: Date.now(),
       tipo: 'externo',
@@ -320,7 +313,7 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
       cambio: calcularCambio(),
       observaciones,
       estado: 'pendiente',
-      fecha: fechaPedido
+      fecha: new Date() // La fecha del pedido es siempre "ahora"
     };
 
     try {
@@ -592,7 +585,11 @@ const PedidoExterno = ({ productos, onPedidoConfirmado, API_URL }) => {
 
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
-                <p>Hora: {horaEntrega ? new Date(horaEntrega).toLocaleString('es-MX') : 'Lo antes posible'}</p>
+                <p>
+                  Hora de entrega: {horaEntrega
+                    ? new Date(horaEntrega).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                    : 'Lo antes posible'}
+                </p>
                 <p>Pago: {metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>
                 {metodoPago === 'efectivo' && pagoCon && (
                   <p>Cambio: ${calcularCambio()}</p>
@@ -1131,9 +1128,9 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
                     {pedido.tipo === 'externo' ? 'Pedido Externo' : `Mesa ${mesas.find(m => m.id === pedido.mesaid)?.numero || 'N/A'}`}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {pedido.horaEntrega
-                      ? new Date(pedido.horaEntrega).toLocaleString('es-MX')
-                      : new Date(pedido.fecha).toLocaleString('es-MX')
+                    {pedido.hora_entrega
+                      ? new Date(pedido.hora_entrega).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
+                      : new Date(pedido.fecha).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
                     }
                   </p>
                 </div>
@@ -1332,10 +1329,12 @@ const AdminPanel = ({ productos, setProductos, pedidos, mesas, onDataChange, API
 
               <div className="mb-4">
                 <h4 className="font-semibold mb-2">Detalles:</h4>
-                {selectedPedido.hora_entrega && (
-                  <p>Hora de entrega: {new Date(selectedPedido.hora_entrega).toLocaleString('es-MX')}</p>
+                {selectedPedido.hora_entrega ? (
+                  <p>Hora de entrega: {new Date(selectedPedido.hora_entrega).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}</p>
+                ) : (
+                  <p>Fecha del pedido: {new Date(selectedPedido.fecha).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}</p>
                 )}
-                {selectedPedido.metodo_pago && <p>Pago: {selectedPedido.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>}
+                {selectedPedido.metodo_pago && <p>Método de Pago: {selectedPedido.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>}
                 {selectedPedido.metodo_pago === 'efectivo' && selectedPedido.pago_con && (
                   <p>Paga con: ${selectedPedido.pago_con}</p>
                 )}
